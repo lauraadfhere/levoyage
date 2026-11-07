@@ -1,0 +1,40 @@
+{
+  "name": "poilian-com",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "cloudflare:provision": "node scripts/provision-cloudflare.mjs",
+    "schema:apply": "node scripts/apply-schema.mjs",
+    "r2:configure": "node scripts/configure-r2.mjs",
+    "parse:schema:apply": "node scripts/apply-parse-schema.mjs",
+    "parse:schema:verify": "node scripts/verify-parse-schema.mjs",
+    "demo:seed": "node scripts/seed-demo-users.mjs",
+    "wilayas:seed": "node scripts/seed-wilayas.mjs",
+    "catalog:import": "node scripts/import-tourism-catalog.mjs",
+    "workers:build": "opennextjs-cloudflare build",
+    "workers:preview": "wrangler dev --config freebuff.wrangler.jsonc"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1127.0",
+    "next": "16.4.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@opennextjs/cloudflare": "1.20.12",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.1",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "wrangler": "4.148.0"
+  },
+  "packageManager": "npm@10.9.8"
+}

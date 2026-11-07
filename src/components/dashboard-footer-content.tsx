@@ -1,0 +1,5 @@
+"use client";
+import { usePathname } from "next/navigation";
+import { LocalizedLink } from "@/components/localized-link";
+const copy = { en: ["Discover Algeria, your way.", "Destinations", "Help centre", "Privacy", "Terms"], fr: ["Découvrez l’Algérie à votre façon.", "Destinations", "Centre d’aide", "Confidentialité", "Conditions"], ar: ["اكتشف الجزائر بطريقتك.", "الوجهات", "مركز المساعدة", "الخصوصية", "الشروط"] } as const;
+export function DashboardFooterContent() { const pathname = usePathname(); const locale = (["en", "fr", "ar"].includes(pathname.split("/")[1]) ? pathname.split("/")[1] : "en") as keyof typeof copy; const t = copy[locale]; return <div className="dashboard-shell"><div><b>Piolian</b><p>{t[0]}</p></div><nav aria-label="Dashboard footer"><LocalizedLink href="/destinations">{t[1]}</LocalizedLink><LocalizedLink href="/contact">{t[2]}</LocalizedLink><LocalizedLink href="/privacy">{t[3]}</LocalizedLink><LocalizedLink href="/terms">{t[4]}</LocalizedLink></nav><small>© 2026 Piolian</small></div>; }

@@ -1,0 +1,2 @@
+import { MarketingPage } from "@/components/site-chrome";
+export default function TermsPage() { return <MarketingPage eyebrow="LEGAL" title="Terms of use" intro="A booking marketplace needs clear terms for travelers, partners and providers."><section className="prose"><h2>Platform terms</h2><p>Booking, payment, cancellation, partner and marketplace terms will be published here before transactions are enabled.</p></section></MarketingPage>; }

@@ -1,0 +1,4 @@
+import Link from "next/link";
+import { DashboardChrome } from "@/components/dashboard-chrome";
+const circuits = [["3 DAYS", "Algiers & Roman coast", "Alger · Tipaza · Cherchell"], ["5 DAYS", "The gateways to the Sahara", "Ghardaïa · El Menia · Timimoun"], ["7 DAYS", "Grand Algeria journey", "Oran · Alger · Constantine"]];
+export default function TouristCircuitPage() { return <DashboardChrome activeHref="/dashboard/circuit-touristique"><section className="dashboard-shell dashboard-tool-page"><p className="dashboard-eyebrow">READY-MADE ITINERARIES</p><h1>Circuit Touristique</h1><p className="dashboard-lead">Choose an itinerary, make it your own, then save the places you want to visit.</p><div className="circuit-list">{circuits.map(([duration, title, route]) => <article key={title}><p>{duration}</p><div><h2>{title}</h2><span>{route}</span></div><Link href="/planner">Plan this circuit <span>→</span></Link></article>)}</div></section></DashboardChrome>; }

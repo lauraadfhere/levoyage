@@ -1,0 +1,26 @@
+"use client";
+
+import { useEffect, useState } from "react";
+type Booking = { bookingReference: string; propertyName?: string; status?: string; checkIn?: string; checkOut?: string; guests?: number; guestName?: string; guestEmail?: string; guestMessage?: string; totalMinor?: number; createdAt?: string };
+function readableDate(value?: string) { if (!value) return "—"; const date = new Date(value); return Number.isNaN(date.getTime()) ? value.slice(0, 10) : date.toLocaleDateString(); }
+export function PartnerBookings() {
+  const [bookings, setBookings] = useState<Booking[]>([]); const [loading, setLoading] = useState(true); const [busy, setBusy] = useState(""); const [error, setError] = useState(""); const [message, setMessage] = useState(""); const [quotes, setQuotes] = useState<Record<string, string>>({});
+  async function refresh() { try { const response = await fetch("/api/partner/bookings", { cache: "no-store" }); const data = await response.json(); if (!response.ok) throw new Error(data.error || "Could not load reservations."); setBookings(data.bookings || []); setError(""); } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not load reservations."); } finally { setLoading(false); } }
+  useEffect(() => {
+    let active = true;
+    fetch("/api/partner/bookings", { cache: "no-store" })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "Could not load reservations.");
+        if (active) { setBookings(data.bookings || []); setError(""); }
+      })
+      .catch((cause: unknown) => { if (active) setError(cause instanceof Error ? cause.message : "Could not load reservations."); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
+  async function decide(bookingReference: string, action: "offer" | "reject" | "complete") { setBusy(bookingReference); setError(""); setMessage(""); try { const response = await fetch("/api/partner/bookings", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ bookingReference, action, totalDzd: quotes[bookingReference] }) }); const data = await response.json(); if (!response.ok) throw new Error(data.error || "Could not update reservation."); setMessage(action === "offer" ? "Quote sent. The traveler must accept before the request is confirmed." : action === "complete" ? "Stay marked complete. The traveler may now leave a review." : "Booking request rejected."); await refresh(); } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not update reservation."); } finally { setBusy(""); } }
+  return <div className="partner-status"><div className="partner-list-heading"><div><p className="dashboard-eyebrow">BOOKING OPERATIONS</p><h2>Reservation requests</h2></div><span>{bookings.filter((item) => item.status === "pending").length} pending</span></div>
+    <p>Confirming a request does not collect payment. Agree on the supported payment method and details with the traveler.</p>{error && <p className="form-error" role="alert">{error}</p>}{message && <p className="profile-message" role="status">{message}</p>}
+    {loading ? <p>Loading reservation requests…</p> : !bookings.length ? <p>No booking requests for your properties yet.</p> : <div className="booking-list">{bookings.map((booking) => <article className="booking-card" key={booking.bookingReference}><header><div><small>REFERENCE · {booking.bookingReference || "—"}</small><h3>{booking.propertyName || "Property"}</h3></div><span className={`status-pill status-${booking.status || "pending"}`}>{booking.status || "pending"}</span></header><p><strong>{booking.guestName || "Traveler"}</strong> · {booking.guestEmail || "—"}</p><p>{readableDate(booking.checkIn)} → {readableDate(booking.checkOut)} · {booking.guests || 1} guest{booking.guests === 1 ? "" : "s"}</p>{booking.guestMessage && <blockquote>{booking.guestMessage}</blockquote>}{booking.status === "pending" && <div className="booking-actions booking-quote-actions"><label>Proposed total price (DZD)<input type="number" min="1" step="1" value={quotes[booking.bookingReference] || ""} onChange={(event) => setQuotes((current) => ({ ...current, [booking.bookingReference]: event.target.value }))} placeholder="Total for this stay" /></label><button type="button" disabled={Boolean(busy) || !quotes[booking.bookingReference]} onClick={() => void decide(booking.bookingReference, "offer")}>{busy === booking.bookingReference ? "Saving…" : "Send quote"}</button><button type="button" className="reject-button" disabled={Boolean(busy)} onClick={() => void decide(booking.bookingReference, "reject")}>Reject</button></div>}{booking.status === "quote_offered" && <p className="availability-note">Quote sent: {(Number(booking.totalMinor || 0) / 100).toLocaleString()} DZD · Awaiting traveler decision · Payment not collected.</p>}{booking.status === "confirmed" && <div className="booking-actions"><p>Traveler accepted. Arrange the disclosed payment method and complete the stay before marking it completed.</p><button type="button" disabled={Boolean(busy)} onClick={() => void decide(booking.bookingReference, "complete")}>Mark completed</button></div>}</article>)}</div>}
+  </div>;
+}

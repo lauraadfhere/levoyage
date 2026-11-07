@@ -1,0 +1,2 @@
+import { MarketingPage } from "@/components/site-chrome";
+export default function AboutPage() { return <MarketingPage eyebrow="ABOUT POILIAN" title="The immersive way to discover Algeria." intro="Poilian brings destination discovery, virtual exploration and travel booking into one Algerian-first platform."><section className="prose"><h2>Discover. Explore in 360°. Book your journey.</h2><p>We help travelers understand a place before they commit, while giving Algerian tourism businesses better tools to be found, trusted and booked.</p></section></MarketingPage>; }

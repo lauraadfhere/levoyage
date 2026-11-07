@@ -1,0 +1,4 @@
+"use client";
+import { useEffect, useState } from "react";
+const currencies = [{ code: "DZD", label: "DZD" }, { code: "USD", label: "$ USD" }, { code: "EUR", label: "€ EUR" }] as const;
+export function CurrencySwitcher() { const [currency, setCurrency] = useState("DZD"); useEffect(() => { const saved = window.localStorage.getItem("piolian_currency"); if (saved && currencies.some(item => item.code === saved)) setCurrency(saved); }, []); function change(value: string) { setCurrency(value); window.localStorage.setItem("piolian_currency", value); window.dispatchEvent(new CustomEvent("piolian-currency-changed", { detail: value })); } return <label className="dashboard-currency"><span className="sr-only">Currency</span><select value={currency} onChange={event => change(event.target.value)} aria-label="Choose currency">{currencies.map(item => <option value={item.code} key={item.code}>{item.label}</option>)}</select></label>; }

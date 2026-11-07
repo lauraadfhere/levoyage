@@ -1,0 +1,2 @@
+import { MarketingPage } from "@/components/site-chrome";
+export default function PrivacyPage() { return <MarketingPage eyebrow="LEGAL" title="Privacy" intro="We are designing the platform to collect only what is needed to deliver travel services and protect traveler data."><section className="prose"><h2>Data and media</h2><p>Private partner media remains protected in object storage. Public media is delivered only through an approved public domain or time-limited link.</p></section></MarketingPage>; }
