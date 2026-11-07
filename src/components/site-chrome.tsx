@@ -49,12 +49,12 @@ const footerColumns = [
       ["Genius loyalty program", "/about"],
       ["Seasonal and holiday deals", "/experiences"],
       ["Travel articles", "/guide"],
-      ["Piolian for Business", "/partner"],
+      ["Le Voyage for Business", "/partner"],
       ["Traveller Review Awards", "/about"],
       ["Car rental", "/explore"],
       ["Flight finder", "/explore"],
       ["Restaurant reservations", "/experiences"],
-      ["Piolian for Travel Agents", "/partner"],
+      ["Le Voyage for Travel Agents", "/partner"],
     ],
   },
   {
@@ -80,7 +80,7 @@ const footerColumns = [
   {
     title: "About",
     items: [
-      ["About Piolian", "/about"],
+      ["About Le Voyage", "/about"],
       ["How We Work", "/about"],
       ["Sustainability", "/about"],
       ["Press center", "/contact"],
@@ -96,8 +96,8 @@ export function SiteHeader() {
   return (
     <header className="inner-header">
       <div className="shell inner-header-row">
-        <LocalizedLink className="brand" href="/" aria-label="Piolian home">
-          <Image src="/veyyri.png" alt="Veyyri" width={155} height={64} priority />
+        <LocalizedLink className="brand" href="/" aria-label="Le Voyage home">
+          <Image src="/levoyage.png" alt="Le Voyage" width={192} height={64} priority />
         </LocalizedLink>
         <nav className="inner-nav" aria-label="Main navigation">
           {links.map(([label, href]) => (
@@ -152,17 +152,17 @@ export function SiteFooter() {
 
         <div className="footer-bottom">
           <p>
-            Piolian is part of the Veyyri travel platform, helping travellers discover Algeria with verified stays, tours and local experiences.
-            Copyright © 2024–{year} Piolian™. All rights reserved.
+            Le Voyage helps travellers discover Algeria with verified stays, tours and local experiences.
+            Copyright © 2024–{year} Le Voyage™. All rights reserved.
           </p>
-          <div className="footer-brands" aria-label="Piolian brands">
-            <LocalizedLink href="/" className="footer-brand-mark">Piolian</LocalizedLink>
+          <div className="footer-brands" aria-label="Le Voyage brands">
+            <LocalizedLink href="/" className="footer-brand-mark">Le Voyage</LocalizedLink>
             <span className="footer-brand-mark brand-veyyri">Veyyri</span>
             <span className="footer-brand-mark brand-tripy">TRRIPYAI</span>
             <span className="footer-brand-mark brand-explore">Explore DZ</span>
             <span className="footer-brand-mark brand-stays">Stays+</span>
           </div>
-          <nav className="footer-social" aria-label="Piolian social channels">
+          <nav className="footer-social" aria-label="Le Voyage social channels">
             <a href="#facebook" aria-label="Facebook">f</a>
             <a href="#x" aria-label="X">𝕏</a>
             <a href="#youtube" aria-label="YouTube">▶</a>

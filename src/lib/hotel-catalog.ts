@@ -1,6 +1,5 @@
 import "server-only";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { hotelCatalogMarkdown } from "@/lib/catalog-content.generated";
 
 export type HotelCatalogItem = {
   city: string;
@@ -39,8 +38,7 @@ let cachedHotels: HotelCatalogItem[] | null = null;
 
 export function getHotelCatalog(): HotelCatalogItem[] {
   if (cachedHotels) return cachedHotels;
-  const source = readFileSync(join(process.cwd(), "public", "algeria_tourism_hotels_near_attractions_master_catalog.md"), "utf8");
-  const inventory = source.split("## 4. Seed hotel inventory")[1]?.split("## 5.")[0] ?? "";
+  const inventory = hotelCatalogMarkdown.split("## 4. Seed hotel inventory")[1]?.split("## 5.")[0] ?? "";
   cachedHotels = inventory.split("\n").flatMap((line) => {
     const cells = line.split("|").map((cell) => cell.trim());
     if (cells.length !== 7 || !cells[1] || cells[1] === "Wilaya / City" || /^-+$/.test(cells[1])) return [];

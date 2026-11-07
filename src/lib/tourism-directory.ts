@@ -1,14 +1,12 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { tourismDirectoryMarkdown } from "@/lib/catalog-content.generated";
 
 export type TourismDirectoryItem = { type: "Wilaya" | "Place"; wilaya: string; name: string; code: string };
-const catalogPath = join(process.cwd(), "algeria_69_wilayas_tourism_master_catalog.md");
 
 let cachedDirectory: TourismDirectoryItem[] | null = null;
 
 export function getTourismDirectory(): TourismDirectoryItem[] {
   if (cachedDirectory) return cachedDirectory;
-  const source = readFileSync(catalogPath, "utf8");
+  const source = tourismDirectoryMarkdown;
   const sections = [...source.matchAll(/^## (\d{2}) — ([^(\n]+?)(?: \(|$)/gm)];
   const directory: TourismDirectoryItem[] = [];
   sections.forEach((section, index) => {

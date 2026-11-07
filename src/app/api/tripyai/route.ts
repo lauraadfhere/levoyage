@@ -227,7 +227,7 @@ export async function POST(request: Request) {
     const support = /help|support|booking|cancel|payment|refund|contact|aide|حجز|مساعدة|دفع/.test(normalized);
     if (support) {
       return NextResponse.json({
-        answer: "I can help you plan a journey and find places. For booking, payment, cancellation or account support, please contact the Piolian support team through the Help centre.",
+        answer: "I can help you plan a journey and find places. For booking, payment, cancellation or account support, please contact the Le Voyage support team through the Help centre.",
         matches: [],
         provider: "deterministic",
       });

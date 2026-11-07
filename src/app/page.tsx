@@ -268,11 +268,11 @@ export default function Home({ initialLanguage = "en" }: { initialLanguage?: Lan
       <section className="hero">
         <div className="shell">
           <header className="topbar">
-            <a className="brand" href="#top" aria-label="Poilian home">
+            <a className="brand" href="#top" aria-label="Le Voyage home">
               <Image
-                src="/veyyri.png"
-                alt="Veyyri"
-                width={155}
+                src="/levoyage.png"
+                alt="Le Voyage"
+                width={192}
                 height={64}
                 priority
               />
@@ -406,7 +406,7 @@ export default function Home({ initialLanguage = "en" }: { initialLanguage?: Lan
             <div className="footer-brand">ALGERIA TRAVEL PLATFORM</div>
             <div className="footer-bottom">
               <span>🇩🇿 DZD</span>
-              <span>© 2026 Poilian · Algeria Travel Platform</span>
+              <span>© 2026 Le Voyage · Algeria Travel Platform</span>
             </div>
           </div>
         </footer>

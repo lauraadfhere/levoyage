@@ -15,8 +15,11 @@
     "demo:seed": "node scripts/seed-demo-users.mjs",
     "wilayas:seed": "node scripts/seed-wilayas.mjs",
     "catalog:import": "node scripts/import-tourism-catalog.mjs",
-    "workers:build": "opennextjs-cloudflare build",
-    "workers:preview": "wrangler dev --config freebuff.wrangler.jsonc"
+    "catalog:modules": "node scripts/generate-catalog-modules.mjs",
+    "prebuild": "npm run catalog:modules",
+    "workers:build": "npm run catalog:modules && opennextjs-cloudflare build",
+    "workers:preview": "wrangler dev --config freebuff.wrangler.jsonc",
+    "workers:deploy": "wrangler deploy"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1127.0",

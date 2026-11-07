@@ -34,7 +34,7 @@ export default async function DestinationsPage({ searchParams }: { searchParams:
     <MarketingPage
       eyebrow="DESTINATION DISCOVERY"
       title="Choose a destination, then explore it."
-      intro="All 69 wilayas from the Piolian tourism catalog. Open a destination page to browse places, stays and 360° / VR previews."
+      intro="All 69 wilayas from the Le Voyage tourism catalog. Open a destination page to browse places, stays and 360° / VR previews."
     >
       <form className="filter-panel destination-filter" action="/destinations" method="get">
         <input name="q" defaultValue={query} placeholder="Search wilaya or place — Algiers, Djanet, Tipaza…" aria-label="Search destinations" />

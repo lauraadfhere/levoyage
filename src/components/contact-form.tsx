@@ -14,7 +14,7 @@ export function ContactForm() {
     const message = String(form.get("message") || "").trim();
     if (!name || !email || !message) return;
     setLoading(true);
-    const subject = encodeURIComponent(`Piolian contact from ${name}`);
+    const subject = encodeURIComponent(`Le Voyage contact from ${name}`);
     const body = encodeURIComponent(`${message}\n\n— ${name}\n${email}`);
     window.location.href = `mailto:hello@piolian.com?subject=${subject}&body=${body}`;
     setSent(true);
