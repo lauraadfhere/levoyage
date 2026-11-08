@@ -1,2 +1,14 @@
 import { MarketingPage } from "@/components/site-chrome";
-export default function TermsPage() { return <MarketingPage eyebrow="LEGAL" title="Terms of use" intro="A booking marketplace needs clear terms for travelers, partners and providers."><section className="prose"><h2>Platform terms</h2><p>Booking, payment, cancellation, partner and marketplace terms will be published here before transactions are enabled.</p></section></MarketingPage>; }
+import { createTranslator } from "@/lib/i18n";
+
+export default function TermsPage({ locale }: { locale?: string }) {
+  const t = createTranslator(locale);
+  return (
+    <MarketingPage eyebrow={t("legal.eyebrow")} title={t("legal.termsTitle")} intro={t("terms.intro")} artTheme="explore">
+      <section className="prose">
+        <h2>{t("terms.h2")}</h2>
+        <p>{t("terms.p")}</p>
+      </section>
+    </MarketingPage>
+  );
+}

@@ -1,3 +1,18 @@
 import { DashboardChrome } from "@/components/dashboard-chrome";
 import { TripyaiChat } from "@/components/tripyai-chat";
-export default function TripyaiPage() { return <DashboardChrome activeHref=""><section className="dashboard-shell dashboard-tool-page tripyai-page"><p className="dashboard-eyebrow">TRAVEL ASSISTANT</p><h1>Meet TRRIPYAI.</h1><p className="dashboard-lead">Ask about Algeria’s places, experiences and travel planning. TRRIPYAI answers from the platform’s destination catalog and approved partner listings, then links you to the matching page. It cannot check live availability, prices or confirm a booking.</p><TripyaiChat /></section></DashboardChrome>; }
+import { createTranslator, dirFor, localeOrDefault } from "@/lib/i18n";
+
+export default function TripyaiPage({ locale }: { locale?: string }) {
+  const active = localeOrDefault(locale);
+  const t = createTranslator(active);
+  return (
+    <DashboardChrome activeHref="">
+      <section className="dashboard-shell dashboard-tool-page tripyai-page" dir={dirFor(active)}>
+        <p className="dashboard-eyebrow">{t("tripyai.dashEyebrow")}</p>
+        <h1>{t("tripyai.h1")}</h1>
+        <p className="dashboard-lead">{t("tripyai.lead")}</p>
+        <TripyaiChat />
+      </section>
+    </DashboardChrome>
+  );
+}

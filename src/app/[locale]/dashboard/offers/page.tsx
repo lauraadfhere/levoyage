@@ -1,2 +1,6 @@
 import DashboardOffersPage from "@/app/dashboard/offers/page";
-export default function LocalDashboardOffersPage() { return <DashboardOffersPage />; }
+
+export default async function LocalDashboardOffersPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return <DashboardOffersPage locale={locale} />;
+}

@@ -1,4 +1,19 @@
 import Link from "next/link";
 import { PartnerOnboarding } from "@/components/partner-onboarding";
 import { MarketingPage } from "@/components/site-chrome";
-export default function PartnerPage() { return <MarketingPage eyebrow="LE VOYAGE PARTNER CENTRE" title="Bring your Algerian business online." intro="Apply to join the marketplace. Verified partners can prepare property drafts and manage booking requests; listings stay offline until moderation approves them."><PartnerOnboarding /><nav className="destination-actions" aria-label="Partner tools"><Link href="/partner/properties">Properties</Link><Link href="/partner/reservations">Reservations</Link><Link href="/partner/studio">360° Studio</Link></nav></MarketingPage>; }
+import { createTranslator, localeOrDefault, pathFor } from "@/lib/i18n";
+
+export default function PartnerPage({ locale }: { locale?: string }) {
+  const active = localeOrDefault(locale);
+  const t = createTranslator(active);
+  return (
+    <MarketingPage eyebrow={t("partner.eyebrow")} title={t("partnerPage.title")} intro={t("partnerPage.intro")} artTheme="explore">
+      <PartnerOnboarding />
+      <nav className="destination-actions" aria-label={t("partner.toolsAria")}>
+        <Link href={pathFor("/partner/properties", active)}>{t("partner.properties")}</Link>
+        <Link href={pathFor("/partner/reservations", active)}>{t("partner.reservations")}</Link>
+        <Link href={pathFor("/partner/studio", active)}>{t("partner.studio")}</Link>
+      </nav>
+    </MarketingPage>
+  );
+}

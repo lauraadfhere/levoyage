@@ -1,71 +1,39 @@
 import Link from "next/link";
 import { MarketingPage } from "@/components/site-chrome";
+import { createTranslator, localeOrDefault, pathFor } from "@/lib/i18n";
 
 const experiences = [
-  {
-    title: "Tassili sunrise excursion",
-    meta: "DJANET · 1 DAY",
-    detail: "A local-guided route through the desert at first light.",
-    price: "From 9,500 DZD",
-    slug: "djanet",
-  },
-  {
-    title: "The Casbah, with a local guide",
-    meta: "ALGIERS · 3 HOURS",
-    detail: "Architecture, stories and hidden corners in the old city.",
-    price: "From 4,500 DZD",
-    slug: "algiers",
-  },
-  {
-    title: "Oran food walk",
-    meta: "ORAN · 4 HOURS",
-    detail: "Taste coastal flavours and meet the people behind them.",
-    price: "From 5,000 DZD",
-    slug: "oran",
-  },
-  {
-    title: "Tipaza heritage coast",
-    meta: "TIPAZA · HALF DAY",
-    detail: "Roman ruins meeting the Mediterranean — explore before you go.",
-    price: "From 6,200 DZD",
-    slug: "tipaza",
-  },
-  {
-    title: "Constantine bridge views",
-    meta: "CONSTANTINE · 2 HOURS",
-    detail: "Clifftop outlooks and city stories above the Rhumel.",
-    price: "From 3,800 DZD",
-    slug: "constantine",
-  },
-  {
-    title: "Ghardaïa oasis walk",
-    meta: "GHARDAÏA · 3 HOURS",
-    detail: "Ksour lanes, markets and M’Zab valley atmosphere.",
-    price: "From 4,200 DZD",
-    slug: "ghardaia",
-  },
-];
+  { title: "experiences.e1t", meta: "experiences.e1m", detail: "experiences.e1d", priceKey: "experiences.price1", slug: "djanet" },
+  { title: "experiences.e2t", meta: "experiences.e2m", detail: "experiences.e2d", priceKey: "experiences.price2", slug: "algiers" },
+  { title: "experiences.e3t", meta: "experiences.e3m", detail: "experiences.e3d", priceKey: "experiences.price3", slug: "oran" },
+  { title: "experiences.e4t", meta: "experiences.e4m", detail: "experiences.e4d", priceKey: "experiences.price4", slug: "tipaza" },
+  { title: "experiences.e5t", meta: "experiences.e5m", detail: "experiences.e5d", priceKey: "experiences.price5", slug: "constantine" },
+  { title: "experiences.e6t", meta: "experiences.e6m", detail: "experiences.e6d", priceKey: "experiences.price6", slug: "ghardaia" },
+] as const;
 
-export default function ExperiencesPage() {
+export default function ExperiencesPage({ locale }: { locale?: string }) {
+  const active = localeOrDefault(locale);
+  const t = createTranslator(active);
   return (
     <MarketingPage
-      eyebrow="THINGS TO DO"
-      title="Meet Algeria beyond the map."
-      intro="Choose cultural tours, nature escapes and local experiences — each one links to a destination page and 360° / VR preview."
+      eyebrow={t("experiences.eyebrow")}
+      title={t("experiences.title")}
+      intro={t("experiences.intro")}
+      artTheme="experiences"
     >
       <div className="offers-grid">
         {experiences.map((item) => (
           <article className="offer-card" key={item.title}>
             <div className="offer-image">{item.slug[0].toUpperCase()}</div>
             <div>
-              <p className="offer-type">{item.meta}</p>
-              <h3>{item.title}</h3>
-              <p className="agency">{item.detail}</p>
-              <strong>{item.price}</strong>
+              <p className="offer-type">{t(item.meta)}</p>
+              <h3>{t(item.title)}</h3>
+              <p className="agency">{t(item.detail)}</p>
+              <strong>{t(item.priceKey)}</strong>
               <div className="place-card-actions">
-                <Link href={`/destinations/${item.slug}`}>Destination</Link>
-                <Link href={`/explore-360?destination=${item.slug}`}>360° / VR</Link>
-                <Link href={`/planner?destination=${encodeURIComponent(item.slug)}`}>Add to plan</Link>
+                <Link href={pathFor(`/destinations/${item.slug}`, active)}>{t("common.destination")}</Link>
+                <Link href={pathFor(`/explore-360?destination=${item.slug}`, active)}>{t("common.view360")}</Link>
+                <Link href={pathFor(`/planner?destination=${encodeURIComponent(item.slug)}`, active)}>{t("experiences.addToPlan")}</Link>
               </div>
             </div>
           </article>

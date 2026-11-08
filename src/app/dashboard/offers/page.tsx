@@ -1,4 +1,37 @@
 import Link from "next/link";
 import { DashboardChrome } from "@/components/dashboard-chrome";
-const offers = [["Sahara journey", "Djanet & Tassili n’Ajjer", "7 days · desert circuit", "From 48,000 DZD"], ["Capital & coast", "Algiers, Tipaza & Cherchell", "3 days · culture & coast", "From 26,500 DZD"], ["Western escape", "Oran & the Mediterranean", "4 days · city break", "From 31,000 DZD"], ["Hoggar discovery", "Tamanrasset & Assekrem", "5 days · mountain adventure", "From 56,000 DZD"], ["Kabylia weekend", "Béjaïa & the coast", "3 days · nature getaway", "From 24,000 DZD"], ["Roman heritage", "Constantine & Timgad", "4 days · history circuit", "From 34,000 DZD"]] as const;
-export default function DashboardOffersPage() { return <DashboardChrome activeHref="/dashboard/offers"><section className="dashboard-shell dashboard-tool-page"><p className="dashboard-eyebrow">CURATED TRAVEL IDEAS</p><h1>Explore offers</h1><p className="dashboard-lead">Browse travel ideas across Algeria. Availability and partner details are confirmed before booking.</p><div className="dashboard-offers-grid">{offers.map(([type, title, detail, price]) => <article key={title}><p>{type}</p><h2>{title}</h2><span>{detail}</span><strong>{price}</strong><Link href="/planner">Plan this trip →</Link></article>)}</div></section></DashboardChrome>; }
+import { createTranslator, localeOrDefault, pathFor } from "@/lib/i18n";
+
+const offers = [
+  ["Sahara journey", "Djanet & Tassili n’Ajjer", "dashboard.o1d", "home.offer1price"],
+  ["Capital & coast", "Algiers, Tipaza & Cherchell", "dashboard.o2d", "dashboard.o2p"],
+  ["Western escape", "Oran & the Mediterranean", "dashboard.o3d", "dashboard.o3p"],
+  ["Hoggar discovery", "Tamanrasset & Assekrem", "dashboard.o4d", "dashboard.o4p"],
+  ["Kabylia weekend", "Béjaïa & the coast", "dashboard.o5d", "dashboard.o5p"],
+  ["Roman heritage", "Constantine & Timgad", "dashboard.o6d", "dashboard.o6p"],
+] as const;
+
+export default function DashboardOffersPage({ locale }: { locale?: string }) {
+  const active = localeOrDefault(locale);
+  const t = createTranslator(active);
+  return (
+    <DashboardChrome activeHref="/dashboard/offers">
+      <section className="dashboard-shell dashboard-tool-page">
+        <p className="dashboard-eyebrow">{t("dashboard.offersEyebrow")}</p>
+        <h1>{t("dashboard.offersTitle")}</h1>
+        <p className="dashboard-lead">{t("dashboard.offersLead")}</p>
+        <div className="dashboard-offers-grid">
+          {offers.map(([type, title, detailKey, priceKey]) => (
+            <article key={title}>
+              <p>{type}</p>
+              <h2>{title}</h2>
+              <span>{t(detailKey)}</span>
+              <strong>{t(priceKey)}</strong>
+              <Link href={pathFor("/planner", active)}>{t("dashboard.planTrip")}</Link>
+            </article>
+          ))}
+        </div>
+      </section>
+    </DashboardChrome>
+  );
+}

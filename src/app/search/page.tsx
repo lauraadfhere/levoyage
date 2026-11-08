@@ -5,15 +5,18 @@ import { findWilayaByName } from "@/lib/destinations-catalog";
 import { getHotelCatalog } from "@/lib/hotel-catalog";
 import { getTourismDirectory } from "@/lib/tourism-directory";
 import { slugify } from "@/lib/slug";
+import { countKey, createTranslator, localeOrDefault, pathFor } from "@/lib/i18n";
 
 type SearchParams = Promise<{ destination?: string; checkIn?: string; checkOut?: string; guests?: string }>;
 
-export default async function SearchPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function SearchPage({ searchParams, locale }: { searchParams: SearchParams; locale?: string }) {
+  const active = localeOrDefault(locale);
+  const t = createTranslator(active);
   const params = await searchParams;
   const destination = (params.destination || "").trim();
   const checkIn = params.checkIn || "";
   const checkOut = params.checkOut || "";
-  const guests = params.guests || "2 guests · 1 room";
+  const guests = params.guests || t("search.guests2");
   const term = destination.toLocaleLowerCase();
   const publishedProperties = (await getPublishedProperties()).filter((property) => !term || `${property.name || ""} ${property.destinationName} ${property.type || ""} ${property.description || ""}`.toLocaleLowerCase().includes(term));
 
@@ -27,57 +30,58 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
 
   return (
     <MarketingPage
-      eyebrow="SEARCH ALGERIA"
-      title={destination ? `Results for “${destination}”` : "Choose a place, then make it yours."}
-      intro="Search connects destination, dates and guests to Algeria stays and places. Adjust your filters below to refine the list."
+      eyebrow={t("search.eyebrow")}
+      title={destination ? t("search.titleFor", { q: destination }) : t("search.title")}
+      intro={t("search.intro")}
+      artTheme="explore"
     >
-      <form className="filter-panel" action="/search" method="get">
+      <form className="filter-panel" action={pathFor("/search", active)} method="get">
         <input
           name="destination"
-          aria-label="Destination"
+          aria-label={t("search.destinationLabel")}
           defaultValue={destination}
-          placeholder="Destination, property or experience"
+          placeholder={t("search.destinationPlaceholder")}
         />
-        <input name="checkIn" aria-label="Check in" type="date" defaultValue={checkIn} />
-        <input name="checkOut" aria-label="Check out" type="date" defaultValue={checkOut} />
-        <select name="guests" aria-label="Guests" defaultValue={guests}>
-          <option>2 guests · 1 room</option>
-          <option>1 guest · 1 room</option>
-          <option>4 guests · 2 rooms</option>
+        <input name="checkIn" aria-label={t("search.checkIn")} type="date" defaultValue={checkIn} />
+        <input name="checkOut" aria-label={t("search.checkOut")} type="date" defaultValue={checkOut} />
+        <select name="guests" aria-label={t("search.guests")} defaultValue={guests}>
+          <option>{t("search.guests2")}</option>
+          <option>{t("search.guests1")}</option>
+          <option>{t("search.guests4")}</option>
         </select>
-        <button type="submit">Search stays</button>
+        <button type="submit">{t("common.searchStays")}</button>
       </form>
 
       <section className="search-results" aria-live="polite">
         <div className="search-results-heading">
-          <h2>{destination ? "Matching places" : "Popular places to start"}</h2>
+          <h2>{destination ? t("search.matching") : t("search.popular")}</h2>
           <p>
-            {places.length} place{places.length === 1 ? "" : "s"}
-            {destination ? ` for “${destination}”` : ""}
+            {countKey(t, "search.resultCountOne", "search.resultCount", places.length)}
+            {destination ? ` · ${destination}` : ""}
             {checkIn && checkOut ? ` · ${checkIn} → ${checkOut}` : ""}
             {` · ${guests}`}
           </p>
         </div>
 
         {places.length === 0 ? (
-          <p className="search-empty">No places matched that search. Try a wilaya or city such as Algiers, Oran, Djanet or Tipaza.</p>
+          <p className="search-empty">{t("search.resultEmpty")}</p>
         ) : (
           <div className="catalog-grid">
             {places.map((place) => (
               <article className="catalog-card" key={`${place.type}-${place.code}-${place.name}`}>
                 <div className="catalog-image">
-                  <span>{place.type.toUpperCase()}</span>
+                  <span>{t(place.type === "Wilaya" ? "search.typeWilaya" : "search.typePlace")}</span>
                 </div>
                 <div className="catalog-copy">
                   <p>{place.wilaya}</p>
                   <h2>{place.name}</h2>
-                  <p className="catalog-detail">Explore stays and things to do around {place.name}.</p>
+                  <p className="catalog-detail">{t("search.cardDetail", { place: place.name })}</p>
                   <div className="destination-card-actions">
-                    <Link href={`/destinations/${slugify(place.wilaya)}?place=${encodeURIComponent(place.name)}`}>
-                      Open destination
+                    <Link href={pathFor(`/destinations/${slugify(place.wilaya)}?place=${encodeURIComponent(place.name)}`, active)}>
+                      {t("common.openDestination")}
                     </Link>
-                    <Link href={`/explore-360?destination=${slugify(place.wilaya)}&place=${encodeURIComponent(place.name)}`}>
-                      360° / VR
+                    <Link href={pathFor(`/explore-360?destination=${slugify(place.wilaya)}&place=${encodeURIComponent(place.name)}`, active)}>
+                      {t("common.view360")}
                     </Link>
                   </div>
                 </div>
@@ -87,19 +91,19 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
         )}
 
         <div className="search-results-heading" style={{ marginTop: 42 }}>
-          <h2>Approved partner stays</h2>
-          <p>{publishedProperties.length} approved listing{publishedProperties.length === 1 ? "" : "s"}</p>
+          <h2>{t("search.approvedHeading")}</h2>
+          <p>{countKey(t, "search.approvedCountOne", "search.approvedCount", publishedProperties.length)}</p>
         </div>
 
-        {publishedProperties.length ? <div className="offers-grid">{publishedProperties.map((property) => <article className="offer-card" key={property.objectId}><div className="offer-image">{property.destinationName.slice(0, 1)}</div><div><p className="offer-type">{property.type || "Accommodation"} · {property.destinationName}</p><h3>{property.name}</h3><p className="agency">Provided by {property.businessName}</p><Link href={`/properties/${property.slug}`}>View details & request →</Link></div></article>)}</div> : <p className="search-empty">No approved partner stays match yet. Requests are available only for published properties.</p>}
+        {publishedProperties.length ? <div className="offers-grid">{publishedProperties.map((property) => <article className="offer-card" key={property.objectId}><div className="offer-image">{property.destinationName.slice(0, 1)}</div><div><p className="offer-type">{property.type || t("common.stays")} · {property.destinationName}</p><h3>{property.name}</h3><p className="agency">{t("search.providedBy", { name: property.businessName })}</p><Link href={`/properties/${property.slug}`}>{t("common.viewDetails")}</Link></div></article>)}</div> : <p className="search-empty">{t("search.approvedEmpty")}</p>}
 
         <div className="search-results-heading" style={{ marginTop: 42 }}>
-          <h2>Catalog inspiration · not bookable</h2>
-          <p>{hotels.length} seed entries</p>
+          <h2>{t("search.catalogHeading")}</h2>
+          <p>{t("search.catalogCount", { count: hotels.length })}</p>
         </div>
 
         {hotels.length === 0 ? (
-          <p className="search-empty">No hotels matched yet. Broaden the destination name and search again.</p>
+          <p className="search-empty">{t("search.catalogEmpty")}</p>
         ) : (
           <div className="offers-grid">
             {hotels.map((hotel) => {
@@ -108,12 +112,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Searc
                 <article className="offer-card" key={`${hotel.city}-${hotel.name}`}>
                   <div className="offer-image">{hotel.city[0]}</div>
                   <div>
-                    <p className="offer-type">Seed catalog · {hotel.propertyType}</p>
+                    <p className="offer-type">{t("search.seedMeta", { type: hotel.propertyType })}</p>
                     <h3>{hotel.name}</h3>
                     <p className="agency">{hotel.city} · {hotel.nearby}</p>
-                    <p className="agency">Availability and rates have not been verified.</p>
+                    <p className="agency">{t("search.unverified")}</p>
                     <div className="destination-card-actions">
-                      <Link href={`/stays?city=${encodeURIComponent(hotel.city)}`}>View stays</Link>
+                      <Link href={`/stays?city=${encodeURIComponent(hotel.city)}`}>{t("search.viewStays")}</Link>
                       {related ? <Link href={`/explore-360?destination=${related.slug}`}>360°</Link> : null}
                     </div>
                   </div>

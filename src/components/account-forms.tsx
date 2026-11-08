@@ -1,15 +1,24 @@
 "use client";
 import { FormEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createTranslator, localeFromPath } from "@/lib/i18n";
 
 const demoAccounts = [
-  { role: "Traveler", email: "demo.traveler@poilian.test", password: "PoilianTraveler!2026", description: "Trips, saved items and bookings" },
-  { role: "Partner", email: "demo.partner@poilian.test", password: "PoilianPartner!2026", description: "Partner profile and tourism business" },
-  { role: "Administrator", email: "demo.admin@poilian.test", password: "PoilianAdmin!2026", description: "Platform administration workflows" },
+  { role: "auth.role.traveler", email: "demo.traveler@poilian.test", password: "PoilianTraveler!2026", description: "auth.role.travelerNote" },
+  { role: "auth.role.partner", email: "demo.partner@poilian.test", password: "PoilianPartner!2026", description: "auth.role.partnerNote" },
+  { role: "auth.role.admin", email: "demo.admin@poilian.test", password: "PoilianAdmin!2026", description: "auth.role.adminNote" },
 ];
+
+function DemoBadge({ large = false }: { large?: boolean }) {
+  return <span className={`demo-access-icon${large ? " demo-access-icon-large" : ""}`} aria-hidden="true">
+    <svg viewBox="0 0 12 12" focusable="false"><path d="M2.8 1.5 10 6l-7.2 4.5Z" fill="currentColor" /></svg>
+  </span>;
+}
 
 export function AuthForm({ mode, locale }: { mode: "login" | "signup"; locale?: string }) {
   const router = useRouter();
+  const pathLocale = localeFromPath(usePathname());
+  const t = createTranslator(locale ?? pathLocale);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [demoOpen, setDemoOpen] = useState(false);
@@ -33,12 +42,12 @@ export function AuthForm({ mode, locale }: { mode: "login" | "signup"; locale?: 
     const payload = { email: form.get("email"), password: form.get("password"), ...(mode === "signup" ? { fullName: form.get("fullName") } : {}) };
     try {
       const response = await fetch(`/api/auth/${mode}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-      const data = await response.json().catch(() => ({ error: "The account service did not respond correctly." }));
-      if (!response.ok) return setError(data.error || "Please try again.");
+      const data = await response.json().catch(() => ({ error: t("auth.errorService") }));
+      if (!response.ok) return setError(data.error || t("auth.errorGeneric"));
       router.push(locale ? `/${locale}/dashboard` : "/dashboard");
       router.refresh();
     } catch {
-      setError("Network error. Check your connection and try again.");
+      setError(t("auth.errorNetwork"));
     } finally {
       setLoading(false);
     }
@@ -46,27 +55,27 @@ export function AuthForm({ mode, locale }: { mode: "login" | "signup"; locale?: 
 
   return <>
     <form className="account-form" onSubmit={submit}>
-      {mode === "signup" && <label>Full name<input name="fullName" autoComplete="name" required placeholder="Your full name" /></label>}
-      <label>Email address<input type="email" name="email" autoComplete="email" required placeholder="Enter your email address" /></label>
-      <label>Password<input type="password" name="password" autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={8} required placeholder="At least 8 characters" /></label>
+      {mode === "signup" && <label>{t("auth.fullName")}<input name="fullName" autoComplete="name" required placeholder={t("auth.fullNamePlaceholder")} /></label>}
+      <label>{t("auth.email")}<input type="email" name="email" autoComplete="email" required placeholder={t("auth.emailPlaceholder")} /></label>
+      <label>{t("auth.password")}<input type="password" name="password" autoComplete={mode === "login" ? "current-password" : "new-password"} minLength={8} required placeholder={t("auth.passwordPlaceholder")} /></label>
       {error && <p className="form-error" role="alert">{error}</p>}
-      <button type="submit" disabled={loading}>{loading ? "Please wait…" : mode === "login" ? "Sign in" : "Create account"}</button>
-      {mode === "login" && <button type="button" className="demo-access-trigger" onClick={() => setDemoOpen(true)} aria-haspopup="dialog">
-        <span className="demo-access-icon" aria-hidden="true">AI</span><span>Demo access</span>
+      <button type="submit" disabled={loading}>{loading ? t("auth.pleaseWait") : mode === "login" ? t("auth.signIn") : t("auth.signUp")}</button>
+      {mode === "login" && <button type="button" className="demo-access-trigger" onClick={() => setDemoOpen(true)} aria-haspopup="dialog" aria-label={t("auth.demoAria")}>
+        <DemoBadge /><span>{t("auth.demoAccess")}</span>
       </button>}
     </form>
     {demoOpen && <div className="demo-access-backdrop" role="presentation" onMouseDown={() => setDemoOpen(false)}>
       <section className="demo-access-dialog" role="dialog" aria-modal="true" aria-labelledby="demo-access-title" onMouseDown={event => event.stopPropagation()}>
-        <button type="button" className="demo-access-close" onClick={() => setDemoOpen(false)} aria-label="Close demo access">×</button>
-        <span className="demo-access-icon demo-access-icon-large" aria-hidden="true">AI</span>
-        <p className="demo-access-eyebrow">MS AII · PROTOTYPE ACCESS</p>
-        <h2 id="demo-access-title">Try a demo account</h2>
-        <p className="demo-access-intro">Use one of these development accounts to explore the prototype. They are not for production use.</p>
+        <button type="button" className="demo-access-close" onClick={() => setDemoOpen(false)} aria-label={t("auth.demoClose")}>×</button>
+        <DemoBadge large />
+        <p className="demo-access-eyebrow">{t("auth.demoEyebrow")}</p>
+        <h2 id="demo-access-title">{t("auth.demoTitle")}</h2>
+        <p className="demo-access-intro">{t("auth.demoIntro")}</p>
         <div className="demo-account-list">
           {demoAccounts.map(account => <article className="demo-account" key={account.role}>
-            <div><strong>{account.role}</strong><p>{account.description}</p></div>
-            <dl><div><dt>Email</dt><dd>{account.email}</dd></div><div><dt>Password</dt><dd>{account.password}</dd></div></dl>
-            <button type="button" onClick={() => useDemo(account.email, account.password)}>Use this account</button>
+            <div><strong>{t(account.role)}</strong><p>{t(account.description)}</p></div>
+            <dl><div><dt>{t("auth.demoEmail")}</dt><dd dir="ltr">{account.email}</dd></div><div><dt>{t("auth.demoPassword")}</dt><dd dir="ltr">{account.password}</dd></div></dl>
+            <button type="button" onClick={() => useDemo(account.email, account.password)}>{t("auth.demoUse")}</button>
           </article>)}
         </div>
       </section>

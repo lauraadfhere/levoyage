@@ -2,44 +2,52 @@ import Link from "next/link";
 import { CatalogGrid } from "@/components/catalog";
 import { MarketingPage } from "@/components/site-chrome";
 import { getWilayas } from "@/lib/destinations-catalog";
+import { createTranslator, localeOrDefault, pathFor } from "@/lib/i18n";
 
-const cards = [
-  { title: "Stays across Algeria", meta: "HOTELS · APARTMENTS · CAMPS", detail: "Find places to stay from the hotel catalog, then open destination pages.", href: "/stays" },
-  { title: "360° / VR explore", meta: "IMMERSIVE PREVIEWS", detail: "Look around destinations before you travel. Drag to explore, Enter VR on mobile.", href: "/explore-360", badge: "360°" },
-  { title: "Destination guides", meta: "69 WILAYAS", detail: "Open any wilaya page: places, stays and immersive scenes from the database.", href: "/destinations" },
-];
-
-export default function ExplorePage() {
+export default function ExplorePage({ locale }: { locale?: string }) {
+  const active = localeOrDefault(locale);
+  const t = createTranslator(active);
+  const cards = [
+    { title: t("explore.c1t"), meta: t("explore.c1m"), detail: t("explore.c1d"), href: pathFor("/stays", active) },
+    { title: t("explore.c2t"), meta: t("explore.c2m"), detail: t("explore.c2d"), href: pathFor("/explore-360", active), badge: "360°" },
+    { title: t("explore.c3t"), meta: t("explore.c3m"), detail: t("explore.c3d"), href: pathFor("/destinations", active) },
+  ];
+  const journey = [
+    ["explore.j1t", "explore.j1d", pathFor("/destinations", active)],
+    ["explore.j2t", "explore.j2d", pathFor("/destinations/algiers", active)],
+    ["explore.j3t", "explore.j3d", pathFor("/explore-360?destination=algiers", active)],
+    ["explore.j4t", "explore.j4d", pathFor("/stays?city=Algiers", active)],
+    ["explore.j5t", "explore.j5d", pathFor("/planner?destination=Algiers", active)],
+    ["explore.j6t", "explore.j6d", pathFor("/tripyai", active)],
+  ] as const;
   const featured = getWilayas().filter((item) => ["16", "31", "56", "25", "42"].includes(item.code)).slice(0, 5);
 
   return (
     <MarketingPage
-      eyebrow="DISCOVERY STARTS HERE"
-      title="Explore Algeria, your way."
-      intro="Choose a destination, open its page, then use 360° / VR, stays and TRRIPYAI — all wired to the tourism catalog."
+      eyebrow={t("explore.eyebrow")}
+      title={t("explore.title")}
+      intro={t("explore.intro")}
+      artTheme="explore"
     >
       <CatalogGrid cards={cards} />
 
-      <section className="feature-channel" aria-label="Feature channels">
-        <h2>Complete core journey</h2>
+      <section className="feature-channel" aria-label={t("explore.journeyTitle")}>
+        <h2>{t("explore.journeyTitle")}</h2>
         <div className="feature-channel-grid">
-          <Link href="/destinations"><strong>1. Choose destination</strong><span>Browse all wilayas from the catalog.</span></Link>
-          <Link href="/destinations/algiers"><strong>2. Open destination page</strong><span>Places, stays and immersive preview.</span></Link>
-          <Link href="/explore-360?destination=algiers"><strong>3. 360° / VR view</strong><span>Look around before you book.</span></Link>
-          <Link href="/stays?city=Algiers"><strong>4. Compare stays</strong><span>Hotels and camps near attractions.</span></Link>
-          <Link href="/planner?destination=Algiers"><strong>5. Plan the trip</strong><span>Draft an itinerary from catalog places.</span></Link>
-          <Link href="/tripyai"><strong>6. Ask TRRIPYAI</strong><span>Query places across the database.</span></Link>
+          {journey.map(([titleKey, detailKey, href]) => (
+            <Link href={href} key={titleKey}><strong>{t(titleKey)}</strong><span>{t(detailKey)}</span></Link>
+          ))}
         </div>
       </section>
 
       {featured.length ? (
-        <section className="scene-picker" aria-label="Featured destinations">
-          <h2>Featured destinations</h2>
+        <section className="scene-picker" aria-label={t("explore.featured")}>
+          <h2>{t("explore.featured")}</h2>
           <div className="scene-picker-list">
             {featured.map((wilaya) => (
-              <Link key={wilaya.slug} href={`/destinations/${wilaya.slug}`}>
+              <Link key={wilaya.slug} href={pathFor(`/destinations/${wilaya.slug}`, active)}>
                 <strong>{wilaya.name}</strong>
-                <span>{wilaya.placeCount} places · Open page</span>
+                <span>{t("explore.openPage", { count: wilaya.placeCount })}</span>
               </Link>
             ))}
           </div>

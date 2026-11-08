@@ -3,10 +3,24 @@ import { MarketingPage } from "@/components/site-chrome";
 import { findWilayaByName, getWilayas, searchDestinations } from "@/lib/destinations-catalog";
 import { redirect } from "next/navigation";
 import wilayaImages from "@/lib/wilaya-images.generated.json";
+import { countKey, createTranslator, localeOrDefault, pathFor } from "@/lib/i18n";
 
 type SearchParams = Promise<{ wilaya?: string; place?: string; q?: string }>;
 
-export default async function DestinationsPage({ searchParams }: { searchParams: SearchParams }) {
+const features = [
+  ["header.explore", "destinations.f1", "/search"],
+  ["header.destinations", "destinations.f2", "/destinations"],
+  ["common.view360", "destinations.f3", "/explore-360"],
+  ["header.stays", "destinations.f4", "/stays"],
+  ["header.thingsToDo", "destinations.f5", "/experiences"],
+  ["header.planner", "destinations.f6", "/planner"],
+  ["home.f6t", "destinations.f7", "/tripyai"],
+  ["header.guide", "destinations.f8", "/guide"],
+] as const;
+
+export default async function DestinationsPage({ searchParams, locale }: { searchParams: SearchParams; locale?: string }) {
+  const active = localeOrDefault(locale);
+  const t = createTranslator(active);
   const params = await searchParams;
   const wilayaParam = params.wilaya?.trim();
   const placeParam = params.place?.trim();
@@ -16,8 +30,8 @@ export default async function DestinationsPage({ searchParams }: { searchParams:
     const match = findWilayaByName(wilayaParam);
     if (match) {
       const target = placeParam
-        ? `/destinations/${match.slug}?place=${encodeURIComponent(placeParam)}`
-        : `/destinations/${match.slug}`;
+        ? pathFor(`/destinations/${match.slug}?place=${encodeURIComponent(placeParam)}`, active)
+        : pathFor(`/destinations/${match.slug}`, active);
       redirect(target);
     }
   }
@@ -26,29 +40,30 @@ export default async function DestinationsPage({ searchParams }: { searchParams:
     const match = findWilayaByName(placeParam) || getWilayas().find((item) =>
       item.name.toLocaleLowerCase().includes(placeParam.toLocaleLowerCase()),
     );
-    if (match) redirect(`/destinations/${match.slug}?place=${encodeURIComponent(placeParam)}`);
+    if (match) redirect(pathFor(`/destinations/${match.slug}?place=${encodeURIComponent(placeParam)}`, active));
   }
 
   const wilayas = query ? searchDestinations(query) : getWilayas();
 
   return (
     <MarketingPage
-      eyebrow="DESTINATION DISCOVERY"
-      title="Choose a destination, then explore it."
-      intro="All 69 wilayas from the Le Voyage tourism catalog. Open a destination page to browse places, stays and 360° / VR previews."
+      eyebrow={t("destinations.eyebrow")}
+      title={t("destinations.title")}
+      intro={t("destinations.intro")}
+      artTheme="destinations"
     >
-      <form className="filter-panel destination-filter" action="/destinations" method="get">
-        <input name="q" defaultValue={query} placeholder="Search wilaya or place — Algiers, Djanet, Tipaza…" aria-label="Search destinations" />
-        <button type="submit">Find destinations</button>
+      <form className="filter-panel destination-filter" action={pathFor("/destinations", active)} method="get">
+        <input name="q" defaultValue={query} placeholder={t("destinations.placeholder")} aria-label={t("destinations.searchLabel")} />
+        <button type="submit">{t("destinations.submit")}</button>
       </form>
 
       <div className="search-results-heading">
-        <h2>{query ? `Results for “${query}”` : "All destinations"}</h2>
-        <p>{wilayas.length} wilaya{wilayas.length === 1 ? "" : "s"}</p>
+        <h2>{query ? t("destinations.resultsFor", { q: query }) : t("destinations.all")}</h2>
+        <p>{countKey(t, "destinations.countOne", "destinations.count", wilayas.length)}</p>
       </div>
 
       {wilayas.length === 0 ? (
-        <p className="search-empty">No destinations matched. Try another wilaya or place name.</p>
+        <p className="search-empty">{t("destinations.empty")}</p>
       ) : (
         <div className="catalog-grid destination-grid">
           {wilayas.map((wilaya) => (
@@ -57,15 +72,15 @@ export default async function DestinationsPage({ searchParams }: { searchParams:
                 className="catalog-image"
                 style={(wilayaImages as Record<string, { url: string }>)[wilaya.slug] ? { backgroundImage: `url("${(wilayaImages as Record<string, { url: string }>)[wilaya.slug].url}")`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
               >
-                <span>WILAYA {wilaya.code}</span>
+                <span>{t("destinations.wilayaCode", { code: wilaya.code })}</span>
               </div>
               <div className="catalog-copy">
-                <p>{wilaya.placeCount} places in catalog</p>
+                <p>{t("destinations.placesInCatalog", { count: wilaya.placeCount })}</p>
                 <h2>{wilaya.name}</h2>
-                <p className="catalog-detail">Open the destination page for places, stays and immersive 360° / VR views.</p>
+                <p className="catalog-detail">{t("destinations.cardDetail")}</p>
                 <div className="destination-card-actions">
-                  <Link href={`/destinations/${wilaya.slug}`}>Open destination</Link>
-                  <Link href={`/explore-360?destination=${wilaya.slug}`}>360° / VR</Link>
+                  <Link href={pathFor(`/destinations/${wilaya.slug}`, active)}>{t("common.openDestination")}</Link>
+                  <Link href={pathFor(`/explore-360?destination=${wilaya.slug}`, active)}>{t("common.view360")}</Link>
                 </div>
               </div>
             </article>
@@ -73,17 +88,12 @@ export default async function DestinationsPage({ searchParams }: { searchParams:
         </div>
       )}
 
-      <section className="feature-channel" aria-label="Core travel features">
-        <h2>Core features channelled for every destination</h2>
+      <section className="feature-channel" aria-label={t("destinations.featuresTitle")}>
+        <h2>{t("destinations.featuresTitle")}</h2>
         <div className="feature-channel-grid">
-          <Link href="/search"><strong>Search</strong><span>Find places and hotels from the Algeria catalog.</span></Link>
-          <Link href="/destinations"><strong>Destinations</strong><span>Pick a wilaya and open its detail page.</span></Link>
-          <Link href="/explore-360"><strong>360° / VR</strong><span>Look around scenes before you travel.</span></Link>
-          <Link href="/stays"><strong>Stays</strong><span>Compare hotels and camps near attractions.</span></Link>
-          <Link href="/experiences"><strong>Things to do</strong><span>Activities and local experiences.</span></Link>
-          <Link href="/planner"><strong>AI Planner</strong><span>Turn a destination into a trip draft.</span></Link>
-          <Link href="/tripyai"><strong>TRRIPYAI</strong><span>Ask about places across the database.</span></Link>
-          <Link href="/guide"><strong>Travel guide</strong><span>Practical ideas for coast and Sahara.</span></Link>
+          {features.map(([titleKey, detailKey, href]) => (
+            <Link href={pathFor(href, active)} key={titleKey}><strong>{t(titleKey)}</strong><span>{t(detailKey)}</span></Link>
+          ))}
         </div>
       </section>
     </MarketingPage>

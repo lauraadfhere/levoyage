@@ -3,64 +3,15 @@
 import { HeroDesignArt } from "@/components/hero-design-art";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import wilayaImages from "@/lib/wilaya-images.generated.json";
 import { HeaderAccount } from "@/components/header-account";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { SiteFooter } from "@/components/site-chrome";
 import { slugify } from "@/lib/slug";
+import { createTranslator, dirFor, type Locale } from "@/lib/i18n";
 
-type Language = "en" | "fr" | "ar";
-const copy = {
-  en: {
-    nav: ["Stays", "Explore", "Things to do", "Travel agencies"],
-    hero: "Discover Algeria, your way",
-    sub: "Hotels, local tours and trusted agency offers across Algeria.",
-    destination: "Where in Algeria?",
-    placeholder: "Algiers, Oran, Djanet, Constantine...",
-    dates: "Select dates",
-    guests: "Travellers",
-    search: "Search",
-    agencies: "For travel agencies",
-    list: "List your offer",
-    offers: "Featured Algeria offers",
-    explore: "Explore Algeria with confidence",
-    register: "Register",
-    signIn: "Sign in",
-  },
-  fr: {
-    nav: ["Séjours", "Explorer", "Activités", "Agences de voyage"],
-    hero: "Découvrez l'Algérie à votre façon",
-    sub: "Hôtels, circuits locaux et offres d'agences de confiance en Algérie.",
-    destination: "Où allez-vous en Algérie ?",
-    placeholder: "Alger, Oran, Djanet, Constantine...",
-    dates: "Choisir les dates",
-    guests: "Voyageurs",
-    search: "Rechercher",
-    agencies: "Pour les agences",
-    list: "Publier une offre",
-    offers: "Offres Algérie à la une",
-    explore: "Explorez l'Algérie en toute confiance",
-    register: "S'inscrire",
-    signIn: "Connexion",
-  },
-  ar: {
-    nav: ["إقامات", "استكشاف", "أنشطة", "وكالات سياحية"],
-    hero: "اكتشف الجزائر بطريقتك",
-    sub: "فنادق وجولات محلية وعروض وكالات موثوقة في كل أنحاء الجزائر.",
-    destination: "إلى أين في الجزائر؟",
-    placeholder: "الجزائر، وهران، جانت، قسنطينة...",
-    dates: "اختر التواريخ",
-    guests: "المسافرون",
-    search: "ابحث",
-    agencies: "للوكالات السياحية",
-    list: "أضف عرضك",
-    offers: "عروض الجزائر المميزة",
-    explore: "اكتشف الجزائر بثقة",
-    register: "إنشاء حساب",
-    signIn: "تسجيل الدخول",
-  },
-} as const;
+type Language = Locale;
 const navHrefs = ["/stays", "/explore", "/experiences", "/partner"];
 const wilayas = [
   "Adrar",
@@ -144,41 +95,39 @@ const placeImages = [
   "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Assekrem.jpg/800px-Assekrem.jpg",
 ];
 
-function regionFor(name: string) {
-  if (/djanet|tamanrasset|illizi|tindouf|adrar|in salah|in guezzam|bordj badji/i.test(name)) return "Sahara";
-  if (/algiers|oran|annaba|bejaia|béjaïa|skikda|tipaza|mostaganem|jijel|el tarf|ain temouchent|aïn témouchent/i.test(name)) return "Coast";
-  if (/tizi|bejaia|béjaïa|bouira|boumerdes|boumerdès|setif|sétif|mila|jijel/i.test(name)) return "Mountains";
-  return "Heritage";
+function regionKeyFor(name: string): "home.regionSahara" | "home.regionCoast" | "home.regionMountains" | "home.regionHeritage" {
+  if (/djanet|tamanrasset|illizi|tindouf|adrar|in salah|in guezzam|bordj badji/i.test(name)) return "home.regionSahara";
+  if (/algiers|oran|annaba|bejaia|béjaïa|skikda|tipaza|mostaganem|jijel|el tarf|ain temouchent|aïn témouchent/i.test(name)) return "home.regionCoast";
+  if (/tizi|bejaia|béjaïa|bouira|boumerdes|boumerdès|setif|sétif|mila|jijel/i.test(name)) return "home.regionMountains";
+  return "home.regionHeritage";
 }
 
 const offers = [
-  {
-    place: "Djanet & Tassili n'Ajjer",
-    type: "Desert circuit",
-    price: "From 48,000 DZD",
-    agency: "Sahara Horizons",
-    slug: "djanet",
-    image: placeImages[2],
-  },
-  {
-    place: "Algiers city break",
-    type: "Hotel + guided Casbah",
-    price: "From 18,500 DZD",
-    agency: "Atlas Voyages",
-    slug: "algiers",
-    image: placeImages[0],
-  },
-  {
-    place: "Oran & the west coast",
-    type: "Weekend escape",
-    price: "From 22,000 DZD",
-    agency: "Oran Travel",
-    slug: "oran",
-    image: placeImages[1],
-  },
-];
+  { placeKey: "home.offer1p", typeKey: "home.offer1t", priceKey: "home.offer1price", agency: "Sahara Horizons", slug: "djanet", image: placeImages[2] },
+  { placeKey: "home.offer2p", typeKey: "home.offer2t", priceKey: "home.offer2price", agency: "Atlas Voyages", slug: "algiers", image: placeImages[0] },
+  { placeKey: "home.offer3p", typeKey: "home.offer3t", priceKey: "home.offer3price", agency: "Oran Travel", slug: "oran", image: placeImages[1] },
+] as const;
 
-function WilayaShowcase() {
+const featureKeys = [
+  ["home.f1t", "home.f1s", "/destinations", "destinations"],
+  ["home.f2t", "home.f2s", "/explore-360", "vr"],
+  ["home.f3t", "home.f3s", "/stays", "stays"],
+  ["home.f4t", "home.f4s", "/experiences", "experiences"],
+  ["home.f5t", "home.f5s", "/planner", "planner"],
+  ["home.f6t", "home.f6s", "/tripyai", "tripyai"],
+] as const;
+
+const featureIcons: Record<string, ReactNode> = {
+  destinations: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z" /><circle cx="12" cy="10" r="2.6" /></svg>,
+  vr: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="2.5" y="7" width="19" height="11" rx="4" /><circle cx="7.8" cy="12.5" r="1.9" /><circle cx="16.2" cy="12.5" r="1.9" /></svg>,
+  stays: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 19v-7h18v7M3 12V7M3 12h18" /><path d="M7 12V9.5h4.5V12" /><path d="M21 16H3" /></svg>,
+  experiences: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3.5 2.1 5.4 5.4.4-4.1 3.6 1.3 5.3L12 15.4l-4.7 2.8 1.3-5.3-4.1-3.6 5.4-.4Z" /></svg>,
+  planner: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="5.5" width="17" height="15" rx="2.5" /><path d="M3.5 10h17M8.5 3.5v4M15.5 3.5v4" /><path d="m9 14.5 2 2 4-4" /></svg>,
+  tripyai: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M4 5.5h16v10.5H9.5L4 20Z" /><path d="M8.5 10.5h7" /></svg>,
+};
+
+function WilayaShowcase({ locale }: { locale: Language }) {
+  const t = createTranslator(locale);
   const [start, setStart] = useState(0);
   const visibleCount = 4;
   const shown = Array.from({ length: visibleCount }, (_, index) => {
@@ -187,60 +136,49 @@ function WilayaShowcase() {
     return {
       name,
       number,
-      region: regionFor(name),
+      region: t(regionKeyFor(name)),
       image: (wilayaImages as Record<string, { url: string }>)[slugify(name)]?.url ?? null,
       slug: slugify(name),
     };
   });
-  const move = (amount: number) =>
-    setStart((value) => (value + amount + wilayas.length) % wilayas.length);
+  const move = (amount: number) => setStart((value) => (value + amount + wilayas.length) % wilayas.length);
   return (
     <section className="wilaya-section" aria-labelledby="wilaya-heading">
       <div className="wilaya-heading">
         <div>
-          <p className="section-kicker">EXPLORE ALGERIA</p>
-          <h2 id="wilaya-heading" className="wilaya-title-black">Every wilaya has a story to tell</h2>
-          <p className="wilaya-subtitle-black">
-            Pick a place, open its destination page, then explore in 360° / VR.
-          </p>
+          <p className="section-kicker">{t("home.wilayaKicker")}</p>
+          <h2 id="wilaya-heading" className="wilaya-title-black">{t("home.wilayaTitle")}</h2>
+          <p className="wilaya-subtitle-black">{t("home.wilayaSub")}</p>
         </div>
         <div className="wilaya-controls">
-          <button type="button" onClick={() => move(-visibleCount)} aria-label="Previous wilayas">
-            ←
-          </button>
-          <button type="button" onClick={() => move(visibleCount)} aria-label="Next wilayas">
-            →
-          </button>
-          <Link href="/destinations">All locations</Link>
+          <button type="button" onClick={() => move(-visibleCount)} aria-label={t("home.prevWilaya")}>←</button>
+          <button type="button" onClick={() => move(visibleCount)} aria-label={t("home.nextWilaya")}>→</button>
+          <Link href="/destinations">{t("home.allLocations")}</Link>
         </div>
       </div>
       <div className="wilaya-grid wilaya-featured place-cards">
         {shown.map(({ name, number, region, image, slug }) => (
           <article className="wilaya-card place-card" key={`${slug}-${number}`} style={image ? { ["--place-image" as string]: `url("${image}")` } : undefined}>
-            <Link href={`/destinations/${slug}`} className="place-card-media" aria-label={`Open ${name}`}>
+            <Link href={`/destinations/${slug}`} className="place-card-media" aria-label={`${t("home.openPage")} · ${name}`}>
               <span className="wilaya-number">{String(number).padStart(2, "0")}</span>
-              <small className="wilaya-availability"><i aria-hidden="true" />Available</small>
+              <small className="wilaya-availability"><i aria-hidden="true" />{t("home.available")}</small>
               <span className="place-card-badge">360° / VR</span>
             </Link>
             <div className="place-card-body">
               <p className="place-card-region">{region}</p>
               <Link href={`/destinations/${slug}`} className="place-card-title">{name}</Link>
-              <p className="place-card-copy">Places, stays and immersive views from the Algeria catalog.</p>
+              <p className="place-card-copy">{t("home.placeCopy")}</p>
               <div className="place-card-actions">
-                <Link href={`/destinations/${slug}`}>Open page</Link>
-                <Link href={`/explore-360?destination=${slug}`}>360° view</Link>
-                <Link href={`/stays?city=${encodeURIComponent(name)}`}>Stays</Link>
+                <Link href={`/destinations/${slug}`}>{t("home.openPage")}</Link>
+                <Link href={`/explore-360?destination=${slug}`}>{t("home.view360")}</Link>
+                <Link href={`/stays?city=${encodeURIComponent(name)}`}>{t("home.staysLabel")}</Link>
               </div>
             </div>
           </article>
         ))}
       </div>
       <div className="wilaya-progress">
-        <span
-          style={{
-            width: `${Math.max(6, ((start + visibleCount) / wilayas.length) * 100)}%`,
-          }}
-        />
+        <span style={{ width: `${Math.max(6, ((start + visibleCount) / wilayas.length) * 100)}%` }} />
       </div>
     </section>
   );
@@ -248,38 +186,36 @@ function WilayaShowcase() {
 
 export default function Home({ initialLanguage = "en" }: { initialLanguage?: Language }) {
   const [language, setLanguage] = useState<Language>(initialLanguage);
+  const t = createTranslator(language);
   const [heroWord, setHeroWord] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
-  const t = copy[language];
-  const heroWords = { en: ["Algeria", "the coast", "the Sahara", "its heritage"], fr: ["l’Algérie", "la côte", "le Sahara", "son patrimoine"], ar: ["الجزائر", "الساحل", "الصحراء", "تراثها"] }[language];
-  useEffect(() => { setHeroWord(0); const timer = window.setInterval(() => setHeroWord(value => (value + 1) % heroWords.length), 2600); return () => window.clearInterval(timer); }, [language, heroWords.length]);
+  const heroWords = [t("home.word1"), t("home.word2"), t("home.word3"), t("home.word4")];
+  useEffect(() => {
+    setHeroWord(0);
+    const timer = window.setInterval(() => setHeroWord((value) => (value + 1) % 4), 2600);
+    return () => window.clearInterval(timer);
+  }, [language]);
+  useEffect(() => setLanguage(initialLanguage), [initialLanguage]);
+
   return (
-    <div dir={language === "ar" ? "rtl" : "ltr"}>
+    <div dir={dirFor(language)} lang={language}>
       <section className="hero">
         <div className="shell">
           <header className="topbar">
             <a className="brand" href="#top" aria-label="Le Voyage home">
-              <Image
-                src="/levoyage-white.png"
-                alt="Le Voyage"
-                width={192}
-                height={64}
-                priority
-              />
+              <Image src="/levoyage-white.png" alt="Le Voyage" width={192} height={64} priority />
             </a>
-            <nav aria-label="Main navigation" className="topnav">
-              {t.nav.map((item, index) => (
-                <Link href={navHrefs[index]} key={item}>
-                  {item}
-                </Link>
+            <nav aria-label={t("header.mainNav")} className="topnav">
+              {[t("header.stays"), t("header.explore"), t("header.thingsToDo"), t("home.agencies")].map((item, index) => (
+                <Link href={navHrefs[index]} key={item}>{item}</Link>
               ))}
             </nav>
             <form className={`header-search${searchOpen ? " is-open" : ""}`} action="/search" method="get" role="search">
-              <label className="sr-only" htmlFor="header-search-input">{t.search}</label>
-              <input id="header-search-input" name="destination" type="search" placeholder={t.search} autoComplete="off" />
+              <label className="sr-only" htmlFor="header-search-input">{t("common.search")}</label>
+              <input id="header-search-input" name="destination" type="search" placeholder={t("home.searchPlaceholder")} autoComplete="off" />
               <button
                 type={searchOpen ? "submit" : "button"}
-                aria-label={t.search}
+                aria-label={t("common.search")}
                 aria-expanded={searchOpen}
                 aria-controls="header-search-input"
                 onClick={() => setSearchOpen(true)}
@@ -288,98 +224,88 @@ export default function Home({ initialLanguage = "en" }: { initialLanguage?: Lan
               </button>
             </form>
             <div className="account-actions">
-              <Link href="/partner">{t.agencies}</Link>
+              <Link href="/partner">{t("home.agencies")}</Link>
               <LocaleSwitcher /><HeaderAccount />
             </div>
           </header>
-          <nav aria-label="Travel categories" className="travel-nav">
-            {t.nav.map((item, index) => (
-              <Link
-                className={index === 0 ? "active" : ""}
-                href={navHrefs[index]}
-                key={item}
-              >
+          <nav aria-label={t("home.featuresAria")} className="travel-nav">
+            {[t("header.stays"), t("header.explore"), t("header.thingsToDo"), t("home.agencies")].map((item, index) => (
+              <Link className={index === 0 ? "active" : ""} href={navHrefs[index]} key={item}>
                 <span aria-hidden="true">{["⌂", "✈", "✦", "◉"][index]}</span>
                 {item}
               </Link>
             ))}
           </nav>
           <div className="headline" id="top">
-            <p className="eyebrow">ALGERIA TRAVEL PLATFORM</p>
-            <h1><span className="hero-prefix">{language === "ar" ? "اكتشف" : language === "fr" ? "Découvrez" : "Discover"}</span> <span className="hero-word" key={heroWords[heroWord]}>{heroWords[heroWord]}</span><span>{language === "ar" ? " بطريقتك" : language === "fr" ? " à votre façon" : ", your way"}</span></h1>
-            <p>{t.sub}</p>
+            <p className="eyebrow">{t("home.eyebrow")}</p>
+            <h1>
+              <span className="hero-prefix">{t("home.heroPrefix")}</span>{" "}
+              <span className="hero-word" key={heroWords[heroWord]}>{heroWords[heroWord]}</span>
+              <span>{t("home.heroSuffix")}</span>
+            </h1>
+            <p>{t("home.sub")}</p>
           </div>
           <div className="hero-algeria-image" aria-hidden="true"><HeroDesignArt /></div>
-          <div className="hero-discovery" aria-label="Start exploring">
-            <Link className="hero-discovery-primary" href="/explore-360">{language === "ar" ? "استكشف بتقنية 360°" : language === "fr" ? "Explorer en 360°" : "Explore in 360°"}</Link>
-            <Link className="hero-discovery-link" href="/destinations">{language === "ar" ? "تصفح الوجهات" : language === "fr" ? "Parcourir les destinations" : "Browse destinations"}</Link>
-            <Link className="hero-discovery-link" href="/tripyai">{language === "ar" ? "اسأل TRRIPYAI" : language === "fr" ? "Demander à TRRIPYAI" : "Ask TRRIPYAI"}</Link>
+          <div className="hero-discovery" aria-label={t("home.heroAria")}>
+            <Link className="hero-discovery-primary" href="/explore-360">{t("home.cta360")}</Link>
+            <Link className="hero-discovery-link" href="/destinations">{t("home.ctaBrowse")}</Link>
+            <Link className="hero-discovery-link" href="/tripyai">{t("home.ctaAsk")}</Link>
           </div>
         </div>
       </section>
       <main className="shell content">
-        <WilayaShowcase />
-        <section className="home-feature-strip" aria-label="Core features">
-          <Link href="/destinations"><strong>Destinations</strong><span>69 wilayas</span></Link>
-          <Link href="/explore-360"><strong>360° / VR</strong><span>Look around</span></Link>
-          <Link href="/stays"><strong>Stays</strong><span>Hotels & camps</span></Link>
-          <Link href="/experiences"><strong>Experiences</strong><span>Things to do</span></Link>
-          <Link href="/planner"><strong>Planner</strong><span>Build a trip</span></Link>
-          <Link href="/tripyai"><strong>TRRIPYAI</strong><span>Ask & discover</span></Link>
+        <WilayaShowcase locale={language} />
+        <section className="home-feature-strip" aria-label={t("home.featuresAria")}>
+          {featureKeys.map(([titleKey, subKey, href, icon]) => (
+            <Link href={href} key={href}>
+              <i className={`feature-icon feature-icon-${icon}`} aria-hidden="true">{featureIcons[icon]}</i>
+              <strong>{t(titleKey)}</strong>
+              <span>{t(subKey)}</span>
+            </Link>
+          ))}
         </section>
 
         <section id="offers" className="home-offers">
           <div className="wilaya-heading">
             <div>
-              <p className="section-kicker">ALGERIA, CURATED</p>
-              <h2>{t.offers}</h2>
+              <p className="section-kicker">{t("home.offersKicker")}</p>
+              <h2>{t("home.offersTitle")}</h2>
             </div>
-            <Link className="wilaya-all" href="/search">Search all offers</Link>
+            <Link className="wilaya-all" href="/search">{t("home.searchAllOffers")}</Link>
           </div>
           <div className="offers-grid">
-            {offers.map((offer) => (
-              <article className="offer-card home-offer-card" key={offer.place}>
-                <div className="offer-image" style={{ backgroundImage: `linear-gradient(180deg, #061c4c33, #061c4c88), url("${offer.image}")` }}>
-                  <span>360°</span>
-                </div>
-                <div>
-                  <p className="offer-type">{offer.type}</p>
-                  <h3>{offer.place}</h3>
-                  <p className="agency">{offer.agency}</p>
-                  <strong>{offer.price}</strong>
-                  <div className="place-card-actions">
-                    <Link href={`/destinations/${offer.slug}`}>Destination</Link>
-                    <Link href={`/explore-360?destination=${offer.slug}`}>360° / VR</Link>
-                    <Link href={`/search?destination=${encodeURIComponent(offer.place)}`}>Book search</Link>
+            {offers.map((offer) => {
+              const place = t(offer.placeKey);
+              return (
+                <article className="offer-card home-offer-card" key={offer.slug}>
+                  <div className="offer-image" style={{ backgroundImage: `linear-gradient(180deg, #061c4c33, #061c4c88), url("${offer.image}")` }}>
+                    <span>360°</span>
                   </div>
-                </div>
-              </article>
-            ))}
+                  <div>
+                    <p className="offer-type">{t(offer.typeKey)}</p>
+                    <h3>{place}</h3>
+                    <p className="agency">{offer.agency}</p>
+                    <strong>{t(offer.priceKey)}</strong>
+                    <div className="place-card-actions">
+                      <Link href={`/destinations/${offer.slug}`}>{t("common.destination")}</Link>
+                      <Link href={`/explore-360?destination=${offer.slug}`}>{t("common.view360")}</Link>
+                      <Link href={`/search?destination=${encodeURIComponent(place)}`}>{t("home.bookSearch")}</Link>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
         <section className="agency-banner" id="agencies">
           <div>
-            <p className="section-kicker">{t.agencies}</p>
-            <h2>{t.explore}</h2>
-            <p>
-              Publish packages, ticket prices and seasonal offers for travellers
-              looking for Algeria.
-            </p>
+            <p className="section-kicker">{t("home.agencies")}</p>
+            <h2>{t("home.exploreTitle")}</h2>
+            <p>{t("home.agencyText")}</p>
           </div>
-          <Link href="/partner">{t.list}</Link>
+          <Link href="/partner">{t("home.listOffer")}</Link>
         </section>
       </main>
-      {false && (
-        <footer className="site-footer">
-          <div className="shell">
-            <div className="footer-brand">ALGERIA TRAVEL PLATFORM</div>
-            <div className="footer-bottom">
-              <span>🇩🇿 DZD</span>
-              <span>© 2026 Le Voyage · Algeria Travel Platform</span>
-            </div>
-          </div>
-        </footer>
-      )}
       <SiteFooter />
     </div>
   );

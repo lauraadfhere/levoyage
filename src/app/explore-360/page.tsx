@@ -4,10 +4,13 @@ import { MarketingPage } from "@/components/site-chrome";
 import { getScenesForDestination, listFeatured360Scenes } from "@/lib/destination-360";
 import { findWilayaByName, getDestinationBySlug } from "@/lib/destinations-catalog";
 import { slugify } from "@/lib/slug";
+import { createTranslator, localeOrDefault, pathFor } from "@/lib/i18n";
 
 type SearchParams = Promise<{ destination?: string; place?: string; scene?: string }>;
 
-export default async function Explore360Page({ searchParams }: { searchParams: SearchParams }) {
+export default async function Explore360Page({ searchParams, locale }: { searchParams: SearchParams; locale?: string }) {
+  const active = localeOrDefault(locale);
+  const t = createTranslator(active);
   const params = await searchParams;
   const destinationParam = params.destination?.trim() || "";
   const placeParam = params.place?.trim();
@@ -18,9 +21,7 @@ export default async function Explore360Page({ searchParams }: { searchParams: S
     ? getDestinationBySlug(slugify(destinationParam)) || (named ? getDestinationBySlug(named.slug) : null)
     : null;
 
-  const scenes = destination
-    ? getScenesForDestination(destination.slug, placeParam)
-    : listFeatured360Scenes(12);
+  const scenes = destination ? getScenesForDestination(destination.slug, placeParam) : listFeatured360Scenes(12);
 
   const activeScene =
     scenes.find((scene) => scene.id === sceneParam)
@@ -29,46 +30,41 @@ export default async function Explore360Page({ searchParams }: { searchParams: S
 
   return (
     <MarketingPage
-      eyebrow="IMMERSIVE ALGERIA"
-      title={destination ? `360° / VR · ${destination.name}` : "Explore before you go."}
-      intro={
-        destination
-          ? `Look around ${destination.name} in 360°. Enter VR on supported phones, then continue to stays or the destination page.`
-          : "Choose a destination scene, drag to look around, and open VR mode. Every scene links back to catalog places and stays."
-      }
+      eyebrow={t("explore360.eyebrow")}
+      title={destination ? t("explore360.titleFor", { name: destination.name }) : t("explore360.title")}
+      intro={destination ? t("explore360.introFor", { name: destination.name }) : t("explore360.intro")}
+      artTheme="explore"
     >
       {!destination ? (
-        <form className="filter-panel destination-filter" action="/explore-360" method="get">
-          <input name="destination" placeholder="Wilaya or destination slug — algiers, oran, djanet…" aria-label="Destination for 360" />
-          <button type="submit">Open 360° / VR</button>
+        <form className="filter-panel destination-filter" action={pathFor("/explore-360", active)} method="get">
+          <input name="destination" placeholder={t("explore360.placeholder")} aria-label={t("explore360.label")} />
+          <button type="submit">{t("explore360.submit")}</button>
         </form>
       ) : (
-        <nav className="destination-actions" aria-label="360 destination links">
-          <Link href={`/destinations/${destination.slug}`}>Destination page</Link>
-          <Link href={`/search?destination=${encodeURIComponent(destination.name)}`}>Search stays</Link>
-          <Link href={`/stays?city=${encodeURIComponent(destination.name)}`}>Stays</Link>
-          <Link href="/explore-360">All 360 scenes</Link>
+        <nav className="destination-actions" aria-label={t("explore360.linksAria")}>
+          <Link href={pathFor(`/destinations/${destination.slug}`, active)}>{t("explore360.destinationPage")}</Link>
+          <Link href={pathFor(`/search?destination=${encodeURIComponent(destination.name)}`, active)}>{t("common.searchStays")}</Link>
+          <Link href={pathFor(`/stays?city=${encodeURIComponent(destination.name)}`, active)}>{t("common.stays")}</Link>
+          <Link href={pathFor("/explore-360", active)}>{t("explore360.allScenes")}</Link>
         </nav>
       )}
 
       {activeScene ? (
         <PanoramaViewer title={activeScene.title} description={activeScene.description} imageUrl={activeScene.imageUrl} />
       ) : (
-        <p className="search-empty">No immersive scenes available yet for this destination.</p>
+        <p className="search-empty">{t("explore360.empty")}</p>
       )}
 
-      <section className="scene-picker" aria-label="Available 360 scenes">
-        <h2>{destination ? `Scenes in ${destination.name}` : "Featured 360° destinations"}</h2>
+      <section className="scene-picker" aria-label={t("explore360.featured")}>
+        <h2>{destination ? t("explore360.scenesFor", { name: destination.name }) : t("explore360.featured")}</h2>
         <div className="scene-picker-list">
           {scenes.map((scene) => (
             <Link
               key={scene.id}
               className={scene.id === activeScene?.id ? "active" : ""}
-              href={
-                destination
-                  ? `/explore-360?destination=${destination.slug}&scene=${encodeURIComponent(scene.id)}${scene.placeName ? `&place=${encodeURIComponent(scene.placeName)}` : ""}`
-                  : `/explore-360?destination=${scene.wilayaSlug}&scene=${encodeURIComponent(scene.id)}`
-              }
+              href={destination
+                ? pathFor(`/explore-360?destination=${destination.slug}&scene=${encodeURIComponent(scene.id)}${scene.placeName ? `&place=${encodeURIComponent(scene.placeName)}` : ""}`, active)
+                : pathFor(`/explore-360?destination=${scene.wilayaSlug}&scene=${encodeURIComponent(scene.id)}`, active)}
             >
               <strong>{scene.title}</strong>
               <span>{scene.wilayaName} · {scene.kind}</span>
@@ -79,10 +75,10 @@ export default async function Explore360Page({ searchParams }: { searchParams: S
 
       <section className="callout">
         <div>
-          <h2>Are you a tourism business?</h2>
-          <p>Use the partner 360° Studio checklist to prepare scenes, hotspots and publish-ready tours for your property.</p>
+          <h2>{t("explore360.partnerTitle")}</h2>
+          <p>{t("explore360.partnerText")}</p>
         </div>
-        <Link href="/partner/studio">Open studio</Link>
+        <Link href={pathFor("/partner/studio", active)}>{t("explore360.openStudio")}</Link>
       </section>
     </MarketingPage>
   );

@@ -2,10 +2,13 @@ import Link from "next/link";
 import { MarketingPage } from "@/components/site-chrome";
 import { getDestinationBySlug, getWilayas, searchDestinations } from "@/lib/destinations-catalog";
 import { slugify } from "@/lib/slug";
+import { createTranslator, localeOrDefault, pathFor } from "@/lib/i18n";
 
 type SearchParams = Promise<{ destination?: string }>;
 
-export default async function PlannerPage({ searchParams }: { searchParams: SearchParams }) {
+export default async function PlannerPage({ searchParams, locale }: { searchParams: SearchParams; locale?: string }) {
+  const active = localeOrDefault(locale);
+  const t = createTranslator(active);
   const params = await searchParams;
   const destinationName = params.destination?.trim() || "";
   const matched = destinationName ? searchDestinations(destinationName)[0] : null;
@@ -14,50 +17,54 @@ export default async function PlannerPage({ searchParams }: { searchParams: Sear
     : null;
 
   const defaultText = destination
-    ? `Plan 4 days in ${destination.name}: mix of places like ${destination.places.slice(0, 3).map((place) => place.name).join(", ") || destination.name}, with stays and a 360° preview before booking.`
-    : "For example: Four days with my family, beaches and good food, under 120,000 DZD.";
+    ? t("planner.defaultFor", {
+        name: destination.name,
+        places: destination.places.slice(0, 3).map((place) => place.name).join(", ") || destination.name,
+      })
+    : t("planner.defaultExample");
 
   return (
     <MarketingPage
-      eyebrow="AI TRIP PLANNER"
-      title={destination ? `Plan ${destination.name}` : "Tell us the journey you imagine."}
-      intro="Describe your dates, budget and interests. Suggestions connect to catalog destinations, stays and 360° explore."
+      eyebrow={t("planner.eyebrow")}
+      title={destination ? t("planner.titleFor", { name: destination.name }) : t("planner.title")}
+      intro={t("planner.intro")}
+      artTheme="planner"
     >
       {destination ? (
-        <nav className="destination-actions" aria-label="Planner destination links">
-          <Link href={`/destinations/${destination.slug}`}>Destination page</Link>
-          <Link href={`/explore-360?destination=${destination.slug}`}>360° / VR</Link>
-          <Link href={`/stays?city=${encodeURIComponent(destination.name)}`}>Stays</Link>
-          <Link href="/tripyai">Ask TRRIPYAI</Link>
+        <nav className="destination-actions" aria-label={t("planner.linksAria")}>
+          <Link href={pathFor(`/destinations/${destination.slug}`, active)}>{t("explore360.destinationPage")}</Link>
+          <Link href={pathFor(`/explore-360?destination=${destination.slug}`, active)}>{t("common.view360")}</Link>
+          <Link href={pathFor(`/stays?city=${encodeURIComponent(destination.name)}`, active)}>{t("common.stays")}</Link>
+          <Link href={pathFor("/tripyai", active)}>{t("home.ctaAsk")}</Link>
         </nav>
       ) : null}
 
       <section className="planner-card">
-        <label htmlFor="trip-request">What would you like to do in Algeria?</label>
+        <label htmlFor="trip-request">{t("planner.prompt")}</label>
         <textarea id="trip-request" name="q" defaultValue={defaultText} placeholder={defaultText} readOnly={false} />
         <div className="destination-card-actions" style={{ marginTop: 12 }}>
-          <Link className="primary-link" href={destination ? `/destinations/${destination.slug}` : "/destinations"}>
-            {destination ? `Open ${destination.name} →` : "Choose a destination →"}
+          <Link className="primary-link" href={destination ? pathFor(`/destinations/${destination.slug}`, active) : pathFor("/destinations", active)}>
+            {destination ? t("planner.openDestination", { name: destination.name }) : t("planner.chooseDestination")}
           </Link>
-          <Link className="primary-link" href="/tripyai">Continue with TRRIPYAI →</Link>
+          <Link className="primary-link" href={pathFor("/tripyai", active)}>{t("planner.continue")}</Link>
         </div>
-        <p>Planning suggestions are not bookings. You choose what to save and reserve.</p>
+        <p>{t("planner.note")}</p>
       </section>
 
-      <section className="scene-picker" aria-label="Planner suggestions">
-        <h2>{destination ? `Catalog places in ${destination.name}` : "Start from a destination"}</h2>
+      <section className="scene-picker" aria-label={t("planner.suggestions")}>
+        <h2>{destination ? t("planner.placesIn", { name: destination.name }) : t("planner.startFrom")}</h2>
         <div className="scene-picker-list">
           {destination
             ? destination.places.slice(0, 10).map((place) => (
-                <Link key={place.name} href={`/destinations/${destination.slug}?place=${encodeURIComponent(place.name)}`}>
+                <Link key={place.name} href={pathFor(`/destinations/${destination.slug}?place=${encodeURIComponent(place.name)}`, active)}>
                   <strong>{place.name}</strong>
-                  <span>Open with 360° preview</span>
+                  <span>{t("planner.openWith360")}</span>
                 </Link>
               ))
             : getWilayas().slice(0, 12).map((wilaya) => (
-                <Link key={wilaya.slug} href={`/planner?destination=${encodeURIComponent(wilaya.name)}`}>
+                <Link key={wilaya.slug} href={pathFor(`/planner?destination=${encodeURIComponent(wilaya.name)}`, active)}>
                   <strong>{wilaya.name}</strong>
-                  <span>{wilaya.placeCount} places · Plan here</span>
+                  <span>{t("planner.planHere", { count: wilaya.placeCount })}</span>
                 </Link>
               ))}
         </div>

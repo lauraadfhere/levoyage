@@ -1,13 +1,11 @@
 import { ContactForm } from "@/components/contact-form";
 import { MarketingPage } from "@/components/site-chrome";
+import { createTranslator } from "@/lib/i18n";
 
-export default function ContactPage() {
+export default function ContactPage({ locale }: { locale?: string }) {
+  const t = createTranslator(locale);
   return (
-    <MarketingPage
-      eyebrow="CONTACT"
-      title="Let’s make travel in Algeria easier."
-      intro="For platform support, partner questions or media enquiries, send the team a message."
-    >
+    <MarketingPage eyebrow={t("contact.eyebrow")} title={t("contact.title")} intro={t("contact.intro")} artTheme="explore">
       <ContactForm />
     </MarketingPage>
   );

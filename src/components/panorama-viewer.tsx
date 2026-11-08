@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { createTranslator, localeFromPath } from "@/lib/i18n";
 
 type Props = {
   title: string;
@@ -9,6 +11,7 @@ type Props = {
 };
 
 export function PanoramaViewer({ title, description, imageUrl }: Props) {
+  const t = createTranslator(localeFromPath(usePathname()));
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const shellRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
@@ -107,7 +110,7 @@ export function PanoramaViewer({ title, description, imageUrl }: Props) {
       if (typeof orientation.requestPermission === "function") {
         const permission = await orientation.requestPermission();
         if (permission !== "granted") {
-          setVrHint("Allow motion access to look around in VR mode.");
+          setVrHint(t("pano.motion"));
           return;
         }
       }
@@ -117,7 +120,7 @@ export function PanoramaViewer({ title, description, imageUrl }: Props) {
         pitchRef.current = Math.max(-0.45, Math.min(0.45, (event.beta - 45) / 90));
       };
       window.addEventListener("deviceorientation", onOrient);
-      setVrHint("VR look mode on — move your device. Press Esc or Exit to leave.");
+      setVrHint(t("pano.vrOn"));
       const cleanup = () => {
         window.removeEventListener("deviceorientation", onOrient);
         setVrHint("");
@@ -152,8 +155,8 @@ export function PanoramaViewer({ title, description, imageUrl }: Props) {
         </div>
         <div className="panorama-actions">
           <button type="button" onClick={resetView}>Reset</button>
-          <button type="button" className="panorama-vr" onClick={enterVr}>Enter VR</button>
-          <button type="button" onClick={exitVr}>Exit</button>
+          <button type="button" className="panorama-vr" onClick={enterVr}>{t("pano.enter")}</button>
+          <button type="button" onClick={exitVr}>{t("pano.exit")}</button>
         </div>
       </div>
       <div className="panorama-stage">
@@ -164,9 +167,9 @@ export function PanoramaViewer({ title, description, imageUrl }: Props) {
           onPointerUp={pointerUp}
           onPointerCancel={pointerUp}
         />
-        {!ready && !error ? <p className="panorama-status">Loading immersive view…</p> : null}
+        {!ready && !error ? <p className="panorama-status">{t("pano.loading")}</p> : null}
         {error ? <p className="panorama-status">{error}</p> : null}
-        <p className="panorama-hint">Drag to look around · pinch/scroll not required</p>
+        <p className="panorama-hint">{t("pano.hint")}</p>
       </div>
       {vrHint ? <p className="panorama-vr-hint">{vrHint}</p> : null}
     </section>

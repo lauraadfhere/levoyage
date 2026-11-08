@@ -1,2 +1,14 @@
 import { MarketingPage } from "@/components/site-chrome";
-export default function AboutPage() { return <MarketingPage eyebrow="ABOUT LE VOYAGE" title="The immersive way to discover Algeria." intro="Le Voyage brings destination discovery, virtual exploration and travel booking into one Algerian-first platform."><section className="prose"><h2>Discover. Explore in 360°. Book your journey.</h2><p>We help travelers understand a place before they commit, while giving Algerian tourism businesses better tools to be found, trusted and booked.</p></section></MarketingPage>; }
+import { createTranslator } from "@/lib/i18n";
+
+export default function AboutPage({ locale }: { locale?: string }) {
+  const t = createTranslator(locale);
+  return (
+    <MarketingPage eyebrow={t("about.eyebrow")} title={t("aboutPage.title")} intro={t("aboutPage.intro")} artTheme="explore">
+      <section className="prose">
+        <h2>{t("aboutPage.h2")}</h2>
+        <p>{t("aboutPage.p")}</p>
+      </section>
+    </MarketingPage>
+  );
+}

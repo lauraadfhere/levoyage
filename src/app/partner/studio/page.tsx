@@ -1,2 +1,21 @@
 import { MarketingPage } from "@/components/site-chrome";
-export default function StudioPage() { return <MarketingPage eyebrow="PARTNER · 360° STUDIO" title="Build a virtual visit that feels real." intro="Upload approved 360° images, create scenes, add hotspots, preview and publish them to your property profile."><ol className="studio-steps"><li><b>1. Upload media</b><span>Panoramas and property images are stored in your protected R2 media bucket.</span></li><li><b>2. Create scenes</b><span>Give each room or place a name, description and language translations.</span></li><li><b>3. Connect hotspots</b><span>Link scenes so travelers can move naturally through the experience.</span></li><li><b>4. Submit for review</b><span>Publish verified media only after platform moderation.</span></li></ol></MarketingPage>; }
+import { createTranslator } from "@/lib/i18n";
+
+export default function StudioPage({ locale }: { locale?: string }) {
+  const t = createTranslator(locale);
+  const steps = [
+    ["studio.s1t", "studio.s1d"],
+    ["studio.s2t", "studio.s2d"],
+    ["studio.s3t", "studio.s3d"],
+    ["studio.s4t", "studio.s4d"],
+  ] as const;
+  return (
+    <MarketingPage eyebrow={t("partner.studio")} title={t("studio.title")} intro={t("studio.intro")} artTheme="explore">
+      <ol className="studio-steps">
+        {steps.map(([titleKey, detailKey]) => (
+          <li key={titleKey}><b>{t(titleKey)}</b><span>{t(detailKey)}</span></li>
+        ))}
+      </ol>
+    </MarketingPage>
+  );
+}

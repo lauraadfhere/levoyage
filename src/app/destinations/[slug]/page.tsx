@@ -5,6 +5,7 @@ import { MarketingPage } from "@/components/site-chrome";
 import { getScenesForDestination } from "@/lib/destination-360";
 import { getDestinationBySlug } from "@/lib/destinations-catalog";
 import { slugify } from "@/lib/slug";
+import { createTranslator, localeOrDefault, pathFor } from "@/lib/i18n";
 
 type Params = Promise<{ slug: string }>;
 type SearchParams = Promise<{ place?: string; scene?: string }>;
@@ -12,10 +13,14 @@ type SearchParams = Promise<{ place?: string; scene?: string }>;
 export default async function DestinationDetail({
   params,
   searchParams,
+  locale,
 }: {
   params: Params;
   searchParams: SearchParams;
+  locale?: string;
 }) {
+  const active = localeOrDefault(locale);
+  const t = createTranslator(active);
   const { slug } = await params;
   const query = await searchParams;
   const destination = getDestinationBySlug(slug);
@@ -34,20 +39,19 @@ export default async function DestinationDetail({
 
   return (
     <MarketingPage
-      eyebrow={`WILAYA ${destination.code}`}
+      eyebrow={t("destination.wilayaEyebrow", { code: destination.code })}
       title={focusedPlace ? `${focusedPlace.name}, ${destination.name}` : destination.name}
-      intro={
-        focusedPlace
-          ? `Explore ${focusedPlace.name} inside ${destination.name}: catalog places, nearby stays and 360° / VR preview.`
-          : `Discover ${destination.places.length} catalog places and ${destination.hotels.length} stay ideas in ${destination.name}, then open immersive 360° / VR.`
-      }
+      intro={focusedPlace
+        ? t("destination.introForPlace", { place: focusedPlace.name, wilaya: destination.name })
+        : t("destination.intro", { places: destination.places.length, stays: destination.hotels.length, wilaya: destination.name })}
+      artTheme="destinations"
     >
-      <nav className="destination-actions" aria-label="Destination actions">
-        <Link href={`/search?destination=${encodeURIComponent(destination.name)}`}>Search stays</Link>
-        <Link href={`/explore-360?destination=${destination.slug}${placeFocus ? `&place=${encodeURIComponent(placeFocus)}` : ""}`}>Full 360° hub</Link>
-        <Link href={`/stays?city=${encodeURIComponent(destination.name)}`}>Browse stays</Link>
-        <Link href={`/planner?destination=${encodeURIComponent(destination.name)}`}>Plan this trip</Link>
-        <Link href="/destinations">All destinations</Link>
+      <nav className="destination-actions" aria-label={t("destination.actionsAria")}>
+        <Link href={pathFor(`/search?destination=${encodeURIComponent(destination.name)}`, active)}>{t("common.searchStays")}</Link>
+        <Link href={pathFor(`/explore-360?destination=${destination.slug}${placeFocus ? `&place=${encodeURIComponent(placeFocus)}` : ""}`, active)}>{t("destination.fullHub")}</Link>
+        <Link href={pathFor(`/stays?city=${encodeURIComponent(destination.name)}`, active)}>{t("destination.browseStays")}</Link>
+        <Link href={pathFor(`/planner?destination=${encodeURIComponent(destination.name)}`, active)}>{t("destination.planTrip")}</Link>
+        <Link href={pathFor("/destinations", active)}>{t("destination.backToAll")}</Link>
       </nav>
 
       {activeScene ? (
@@ -55,14 +59,14 @@ export default async function DestinationDetail({
       ) : null}
 
       {scenes.length > 1 ? (
-        <section className="scene-picker" aria-label="360 scenes">
-          <h2>Scenes in {destination.name}</h2>
+        <section className="scene-picker" aria-label={t("destination.scenesAria")}>
+          <h2>{t("destination.scenesHeading", { name: destination.name })}</h2>
           <div className="scene-picker-list">
             {scenes.map((scene) => (
               <Link
                 key={scene.id}
                 className={scene.id === activeScene?.id ? "active" : ""}
-                href={`/destinations/${destination.slug}?scene=${encodeURIComponent(scene.id)}${scene.placeName ? `&place=${encodeURIComponent(scene.placeName)}` : ""}`}
+                href={pathFor(`/destinations/${destination.slug}?scene=${encodeURIComponent(scene.id)}${scene.placeName ? `&place=${encodeURIComponent(scene.placeName)}` : ""}`, active)}
               >
                 <strong>{scene.title}</strong>
                 <span>{scene.kind}</span>
@@ -74,15 +78,15 @@ export default async function DestinationDetail({
 
       <div className="detail-layout destination-detail">
         <section>
-          <h2>Places in the catalog</h2>
-          <p>These places come from the Algeria tourism master catalog for {destination.name}.</p>
+          <h2>{t("destination.catalogHeading")}</h2>
+          <p>{t("destination.catalogIntro", { name: destination.name })}</p>
           {destination.places.length === 0 ? (
-            <p className="search-empty">No individual places listed yet for this wilaya.</p>
+            <p className="search-empty">{t("destination.noPlacesYet")}</p>
           ) : (
             <ul className="place-list destination-place-list">
               {destination.places.map((place) => (
                 <li key={place.name}>
-                  <Link href={`/destinations/${destination.slug}?place=${encodeURIComponent(place.name)}`}>
+                  <Link href={pathFor(`/destinations/${destination.slug}?place=${encodeURIComponent(place.name)}`, active)}>
                     <span>{place.name}</span>
                     <b>360° →</b>
                   </Link>
@@ -92,20 +96,20 @@ export default async function DestinationDetail({
           )}
         </section>
         <aside>
-          <b>Trip building blocks</b>
-          <span>{destination.places.length} places · {destination.hotels.length} stays · 360° / VR ready</span>
-          <Link className="primary-link" href={`/explore-360?destination=${destination.slug}`}>Open VR explorer →</Link>
-          <Link className="primary-link" href={`/tripyai`}>Ask TRRIPYAI about {destination.name} →</Link>
+          <b>{t("destination.blocks")}</b>
+          <span>{t("destination.blocksSummary", { places: destination.places.length, stays: destination.hotels.length })}</span>
+          <Link className="primary-link" href={pathFor(`/explore-360?destination=${destination.slug}`, active)}>{t("destination.openVR")}</Link>
+          <Link className="primary-link" href={pathFor("/tripyai", active)}>{t("destination.ask", { name: destination.name })}</Link>
         </aside>
       </div>
 
       <section className="destination-stays">
         <div className="search-results-heading">
-          <h2>Stay ideas near {destination.name}</h2>
-          <p>{destination.hotels.length} from hotel catalog</p>
+          <h2>{t("destination.stayIdeas", { name: destination.name })}</h2>
+          <p>{t("destination.fromCatalog", { count: destination.hotels.length })}</p>
         </div>
         {destination.hotels.length === 0 ? (
-          <p className="search-empty">No seeded hotels matched this wilaya yet. Use search to explore nearby cities.</p>
+          <p className="search-empty">{t("destination.noHotels")}</p>
         ) : (
           <div className="offers-grid">
             {destination.hotels.slice(0, 6).map((hotel) => (
@@ -115,8 +119,8 @@ export default async function DestinationDetail({
                   <p className="offer-type">{hotel.propertyType}</p>
                   <h3>{hotel.name}</h3>
                   <p className="agency">{hotel.city} · {hotel.nearby}</p>
-                  <strong>{hotel.rooms[0] || "Rooms available"}</strong>
-                  <Link href={`/stays?city=${encodeURIComponent(hotel.city)}`}>View stays</Link>
+                  <strong>{hotel.rooms[0] || t("destination.roomsAvailable")}</strong>
+                  <Link href={pathFor(`/stays?city=${encodeURIComponent(hotel.city)}`, active)}>{t("search.viewStays")}</Link>
                 </div>
               </article>
             ))}
