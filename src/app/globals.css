@@ -877,3 +877,22 @@ html, body { overflow-x: hidden; }
 .header-search.is-open input { display: block; }
 .header-search button { display: inline-flex; align-items: center; justify-content: center; }
 @media (max-width: 600px) { .header-search, .header-search.is-open { flex: 0 0 auto; width: 36px; order: 0; } .topbar { flex-wrap: nowrap; height: 58px; padding-block: 0; } .header-search.is-open { flex: 1 1 auto; width: auto; order: 3; } }
+
+/* Search and marketing pages: keep intro copy clear of decorative art on phones */
+@media (max-width: 760px) {
+  .page-intro-art { display: none; }
+  .page-intro > .shell { min-height: 0; }
+  .page-intro { padding: 36px 0 30px; }
+  .page-intro h1 { font-size: 30px; }
+  .filter-panel { grid-template-columns: 1fr; }
+  .search-results-heading { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
+
+/* Inner pages header on phones: nav gets its own full-width scrollable row */
+@media (max-width: 600px) {
+  .inner-header-row { flex-wrap: wrap; row-gap: 6px; min-height: 0; padding-block: 8px; }
+  .inner-nav { order: 3; flex: 0 0 100%; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+  .inner-nav::-webkit-scrollbar { display: none; }
+  .inner-nav a { flex: 0 0 auto; border: 1px solid #ffffff33; border-radius: 16px; padding: 6px 12px; background: #ffffff0d; }
+  .inner-nav a:hover { color: #fff; }
+}
