@@ -1,22 +1,9 @@
 import type { Metadata } from "next";
-import { Barlow, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import "./dashboard-enhancements.css";
+import { dejavuMono, inter, lora, poppins } from "./fonts";
 import { CookieBanner } from "@/components/cookie-banner";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
-
-const barlow = Barlow({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  display: "swap",
-  variable: "--font-barlow",
-});
-
-const nunitoSans = Nunito_Sans({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-nunito-sans",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -58,7 +45,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${barlow.variable} ${nunitoSans.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${poppins.variable} ${inter.variable} ${lora.variable} ${dejavuMono.variable}`} suppressHydrationWarning>
       <body>{children}<CookieBanner /></body>
     </html>
   );
