@@ -1,5 +1,6 @@
 "use client";
 
+import { HeroDesignArt } from "@/components/hero-design-art";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -198,8 +199,8 @@ function WilayaShowcase() {
       <div className="wilaya-heading">
         <div>
           <p className="section-kicker">EXPLORE ALGERIA</p>
-          <h2 id="wilaya-heading">Every wilaya has a story to tell</h2>
-          <p>
+          <h2 id="wilaya-heading" className="wilaya-title-black">Every wilaya has a story to tell</h2>
+          <p className="wilaya-subtitle-black">
             Pick a place, open its destination page, then explore in 360° / VR.
           </p>
         </div>
@@ -272,6 +273,11 @@ export default function Home({ initialLanguage = "en" }: { initialLanguage?: Lan
                 </Link>
               ))}
             </nav>
+            <form className="header-search" action="/search" method="get" role="search">
+              <label className="sr-only" htmlFor="header-search-input">{t.search}</label>
+              <input id="header-search-input" name="destination" type="search" placeholder={t.search} autoComplete="off" />
+              <button type="submit" aria-label={t.search}>⌕</button>
+            </form>
             <div className="account-actions">
               <Link href="/partner">{t.agencies}</Link>
               <LocaleSwitcher /><HeaderAccount />
@@ -294,6 +300,7 @@ export default function Home({ initialLanguage = "en" }: { initialLanguage?: Lan
             <h1><span className="hero-prefix">{language === "ar" ? "اكتشف" : language === "fr" ? "Découvrez" : "Discover"}</span> <span className="hero-word" key={heroWords[heroWord]}>{heroWords[heroWord]}</span><span>{language === "ar" ? " بطريقتك" : language === "fr" ? " à votre façon" : ", your way"}</span></h1>
             <p>{t.sub}</p>
           </div>
+          <div className="hero-algeria-image" aria-hidden="true"><HeroDesignArt /></div>
           <div className="hero-discovery" aria-label="Start exploring">
             <Link className="hero-discovery-primary" href="/explore-360">{language === "ar" ? "استكشف بتقنية 360°" : language === "fr" ? "Explorer en 360°" : "Explore in 360°"}</Link>
             <Link className="hero-discovery-link" href="/destinations">{language === "ar" ? "تصفح الوجهات" : language === "fr" ? "Parcourir les destinations" : "Browse destinations"}</Link>
