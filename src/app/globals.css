@@ -869,3 +869,11 @@ html, body { overflow-x: hidden; }
 /* Home wilaya section: black text on light background */
 .wilaya-title-black { color: #000 !important; }
 .wilaya-subtitle-black { color: #000 !important; }
+
+/* Header search: icon-only until opened */
+.header-search { flex: 0 0 auto; width: 36px; height: 36px; overflow: hidden; transition: width .2s ease; }
+.header-search input { display: none; }
+.header-search.is-open { flex: 0 1 190px; width: 190px; }
+.header-search.is-open input { display: block; }
+.header-search button { display: inline-flex; align-items: center; justify-content: center; }
+@media (max-width: 600px) { .header-search, .header-search.is-open { flex: 0 0 auto; width: 36px; order: 0; } .topbar { flex-wrap: nowrap; height: 58px; padding-block: 0; } .header-search.is-open { flex: 1 1 auto; width: auto; order: 3; } }

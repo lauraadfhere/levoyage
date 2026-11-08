@@ -249,6 +249,7 @@ function WilayaShowcase() {
 export default function Home({ initialLanguage = "en" }: { initialLanguage?: Language }) {
   const [language, setLanguage] = useState<Language>(initialLanguage);
   const [heroWord, setHeroWord] = useState(0);
+  const [searchOpen, setSearchOpen] = useState(false);
   const t = copy[language];
   const heroWords = { en: ["Algeria", "the coast", "the Sahara", "its heritage"], fr: ["l’Algérie", "la côte", "le Sahara", "son patrimoine"], ar: ["الجزائر", "الساحل", "الصحراء", "تراثها"] }[language];
   useEffect(() => { setHeroWord(0); const timer = window.setInterval(() => setHeroWord(value => (value + 1) % heroWords.length), 2600); return () => window.clearInterval(timer); }, [language, heroWords.length]);
@@ -273,10 +274,18 @@ export default function Home({ initialLanguage = "en" }: { initialLanguage?: Lan
                 </Link>
               ))}
             </nav>
-            <form className="header-search" action="/search" method="get" role="search">
+            <form className={`header-search${searchOpen ? " is-open" : ""}`} action="/search" method="get" role="search">
               <label className="sr-only" htmlFor="header-search-input">{t.search}</label>
               <input id="header-search-input" name="destination" type="search" placeholder={t.search} autoComplete="off" />
-              <button type="submit" aria-label={t.search}>⌕</button>
+              <button
+                type={searchOpen ? "submit" : "button"}
+                aria-label={t.search}
+                aria-expanded={searchOpen}
+                aria-controls="header-search-input"
+                onClick={() => setSearchOpen(true)}
+              >
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M20 20l-4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
+              </button>
             </form>
             <div className="account-actions">
               <Link href="/partner">{t.agencies}</Link>
