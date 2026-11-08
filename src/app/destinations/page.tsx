@@ -2,6 +2,7 @@ import Link from "next/link";
 import { MarketingPage } from "@/components/site-chrome";
 import { findWilayaByName, getWilayas, searchDestinations } from "@/lib/destinations-catalog";
 import { redirect } from "next/navigation";
+import wilayaImages from "@/lib/wilaya-images.generated.json";
 
 type SearchParams = Promise<{ wilaya?: string; place?: string; q?: string }>;
 
@@ -52,7 +53,10 @@ export default async function DestinationsPage({ searchParams }: { searchParams:
         <div className="catalog-grid destination-grid">
           {wilayas.map((wilaya) => (
             <article className="catalog-card" key={wilaya.slug}>
-              <div className="catalog-image">
+              <div
+                className="catalog-image"
+                style={(wilayaImages as Record<string, { url: string }>)[wilaya.slug] ? { backgroundImage: `url("${(wilayaImages as Record<string, { url: string }>)[wilaya.slug].url}")`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
+              >
                 <span>WILAYA {wilaya.code}</span>
               </div>
               <div className="catalog-copy">

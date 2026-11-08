@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import "./dashboard-enhancements.css";
 import { dejavuMono, inter, lora, poppins } from "./fonts";
+import "./dashboard-enhancements.css";
 import { CookieBanner } from "@/components/cookie-banner";
+import { DocumentDirection } from "@/components/document-direction";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${poppins.variable} ${inter.variable} ${lora.variable} ${dejavuMono.variable}`} suppressHydrationWarning>
-      <body>{children}<CookieBanner /></body>
+      <body><DocumentDirection />{children}<CookieBanner /></body>
     </html>
   );
 }

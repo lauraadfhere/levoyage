@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import wilayaImages from "@/lib/wilaya-images.generated.json";
 import { HeaderAccount } from "@/components/header-account";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { SiteFooter } from "@/components/site-chrome";
@@ -186,7 +187,7 @@ function WilayaShowcase() {
       name,
       number,
       region: regionFor(name),
-      image: placeImages[(start + index) % placeImages.length],
+      image: (wilayaImages as Record<string, { url: string }>)[slugify(name)]?.url ?? null,
       slug: slugify(name),
     };
   });
@@ -214,7 +215,7 @@ function WilayaShowcase() {
       </div>
       <div className="wilaya-grid wilaya-featured place-cards">
         {shown.map(({ name, number, region, image, slug }) => (
-          <article className="wilaya-card place-card" key={`${slug}-${number}`} style={{ ["--place-image" as string]: `url("${image}")` }}>
+          <article className="wilaya-card place-card" key={`${slug}-${number}`} style={image ? { ["--place-image" as string]: `url("${image}")` } : undefined}>
             <Link href={`/destinations/${slug}`} className="place-card-media" aria-label={`Open ${name}`}>
               <span className="wilaya-number">{String(number).padStart(2, "0")}</span>
               <small className="wilaya-availability"><i aria-hidden="true" />Available</small>
@@ -246,23 +247,10 @@ function WilayaShowcase() {
 
 export default function Home({ initialLanguage = "en" }: { initialLanguage?: Language }) {
   const [language, setLanguage] = useState<Language>(initialLanguage);
-  const [destination, setDestination] = useState("");
-  const [checkIn, setCheckIn] = useState("");
-  const [checkOut, setCheckOut] = useState("");
-  const [guests, setGuests] = useState("2 adults · 1 room");
   const [heroWord, setHeroWord] = useState(0);
   const t = copy[language];
   const heroWords = { en: ["Algeria", "the coast", "the Sahara", "its heritage"], fr: ["l’Algérie", "la côte", "le Sahara", "son patrimoine"], ar: ["الجزائر", "الساحل", "الصحراء", "تراثها"] }[language];
   useEffect(() => { setHeroWord(0); const timer = window.setInterval(() => setHeroWord(value => (value + 1) % heroWords.length), 2600); return () => window.clearInterval(timer); }, [language, heroWords.length]);
-  function search(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const query = new URLSearchParams();
-    if (destination.trim()) query.set("destination", destination.trim());
-    if (checkIn) query.set("checkIn", checkIn);
-    if (checkOut) query.set("checkOut", checkOut);
-    if (guests) query.set("guests", guests);
-    window.location.assign(`/search?${query.toString()}`);
-  }
   return (
     <div dir={language === "ar" ? "rtl" : "ltr"}>
       <section className="hero">
@@ -270,7 +258,7 @@ export default function Home({ initialLanguage = "en" }: { initialLanguage?: Lan
           <header className="topbar">
             <a className="brand" href="#top" aria-label="Le Voyage home">
               <Image
-                src="/levoyage.png"
+                src="/levoyage-white.png"
                 alt="Le Voyage"
                 width={192}
                 height={64}
@@ -306,46 +294,11 @@ export default function Home({ initialLanguage = "en" }: { initialLanguage?: Lan
             <h1><span className="hero-prefix">{language === "ar" ? "اكتشف" : language === "fr" ? "Découvrez" : "Discover"}</span> <span className="hero-word" key={heroWords[heroWord]}>{heroWords[heroWord]}</span><span>{language === "ar" ? " بطريقتك" : language === "fr" ? " à votre façon" : ", your way"}</span></h1>
             <p>{t.sub}</p>
           </div>
-          <div className="hero-algeria-image" aria-hidden="true"><Image src="/algeria.png" alt="" width={680} height={560} priority /></div>
-          <form className="search-form" onSubmit={search}>
-            <label className="field destination-field">
-              <span className="field-icon">⌖</span>
-              <span className="field-copy">
-                <small>{t.destination}</small>
-                <input
-                  value={destination}
-                  onChange={(event) => setDestination(event.target.value)}
-                  placeholder={t.placeholder}
-                />
-              </span>
-            </label>
-            <label className="field date-field">
-              <span className="field-icon">▦</span>
-              <span className="field-copy">
-                <small>{t.dates}</small>
-                <span className="date-range">
-                  <input type="date" value={checkIn} onChange={(event) => setCheckIn(event.target.value)} aria-label="Check-in date" />
-                  <span aria-hidden="true">—</span>
-                  <input type="date" value={checkOut} min={checkIn || undefined} onChange={(event) => setCheckOut(event.target.value)} aria-label="Check-out date" />
-                </span>
-              </span>
-            </label>
-            <label className="field guests-field">
-              <span className="field-icon">♟</span>
-              <span className="field-copy">
-                <small>{t.guests}</small>
-                <select value={guests} onChange={(event) => setGuests(event.target.value)} aria-label={t.guests}>
-                  <option>2 adults · 1 room</option>
-                  <option>1 adult · 1 room</option>
-                  <option>2 adults · 1 child · 1 room</option>
-                  <option>4 adults · 2 rooms</option>
-                </select>
-              </span>
-            </label>
-            <button className="search-button" type="submit">
-              {t.search}
-            </button>
-          </form>
+          <div className="hero-discovery" aria-label="Start exploring">
+            <Link className="hero-discovery-primary" href="/explore-360">{language === "ar" ? "استكشف بتقنية 360°" : language === "fr" ? "Explorer en 360°" : "Explore in 360°"}</Link>
+            <Link className="hero-discovery-link" href="/destinations">{language === "ar" ? "تصفح الوجهات" : language === "fr" ? "Parcourir les destinations" : "Browse destinations"}</Link>
+            <Link className="hero-discovery-link" href="/tripyai">{language === "ar" ? "اسأل TRRIPYAI" : language === "fr" ? "Demander à TRRIPYAI" : "Ask TRRIPYAI"}</Link>
+          </div>
         </div>
       </section>
       <main className="shell content">

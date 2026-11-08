@@ -97,7 +97,7 @@ export function SiteHeader() {
     <header className="inner-header">
       <div className="shell inner-header-row">
         <LocalizedLink className="brand" href="/" aria-label="Le Voyage home">
-          <Image src="/levoyage.png" alt="Le Voyage" width={192} height={64} priority />
+          <Image src="/levoyage-white.png" alt="Le Voyage" width={192} height={64} priority />
         </LocalizedLink>
         <nav className="inner-nav" aria-label="Main navigation">
           {links.map(([label, href]) => (
