@@ -34,6 +34,7 @@ export default async function SearchPage({ searchParams, locale }: { searchParam
       title={destination ? t("search.titleFor", { q: destination }) : t("search.title")}
       intro={t("search.intro")}
       artTheme="explore"
+      className="search-page"
     >
       <form className="filter-panel" action={pathFor("/search", active)} method="get">
         <input

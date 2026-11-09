@@ -51,6 +51,7 @@ export default async function DestinationsPage({ searchParams, locale }: { searc
       title={t("destinations.title")}
       intro={t("destinations.intro")}
       artTheme="destinations"
+      headerVariant="dashboard"
     >
       <form className="filter-panel destination-filter" action={pathFor("/destinations", active)} method="get">
         <input name="q" defaultValue={query} placeholder={t("destinations.placeholder")} aria-label={t("destinations.searchLabel")} />

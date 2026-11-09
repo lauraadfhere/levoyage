@@ -7,7 +7,7 @@ import { slugify } from "@/lib/slug";
 export const runtime = "nodejs";
 type Property = ParseRecord & { business?: { objectId?: string }; name?: string; slug?: string; type?: string; status?: string; address?: string; description?: string };
 type Destination = ParseRecord & { slug?: string; wilaya?: string; city?: string };
-const types = new Set(["hotel", "resort", "apartment", "guesthouse", "villa", "hostel", "residence", "camp"]);
+const types = new Set(["hotel", "resort", "apartment", "guesthouse", "villa", "hostel", "residence", "camp", "vacation-home", "bnb", "unique-stay"]);
 
 export async function GET() {
   try {

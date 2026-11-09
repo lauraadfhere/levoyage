@@ -240,7 +240,7 @@ export default function Home({ initialLanguage = "en" }: { initialLanguage?: Lan
             <p className="eyebrow">{t("home.eyebrow")}</p>
             <h1>
               <span className="hero-prefix">{t("home.heroPrefix")}</span>{" "}
-              <span className="hero-word" key={heroWords[heroWord]}>{heroWords[heroWord]}</span>
+              <span className="hero-word hero-art-title" key={heroWords[heroWord]}>{heroWords[heroWord]}</span>
               <span>{t("home.heroSuffix")}</span>
             </h1>
             <p>{t("home.sub")}</p>
@@ -248,8 +248,8 @@ export default function Home({ initialLanguage = "en" }: { initialLanguage?: Lan
           <div className="hero-algeria-image" aria-hidden="true"><HeroDesignArt /></div>
           <div className="hero-discovery" aria-label={t("home.heroAria")}>
             <Link className="hero-discovery-primary" href="/explore-360">{t("home.cta360")}</Link>
-            <Link className="hero-discovery-link" href="/destinations">{t("home.ctaBrowse")}</Link>
-            <Link className="hero-discovery-link" href="/tripyai">{t("home.ctaAsk")}</Link>
+            <Link className="hero-discovery-link" href="/destinations"><span className="hero-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></svg></span>{t("home.ctaBrowse")}</Link>
+            <Link className="hero-discovery-link" href="/tripyai"><span className="hero-link-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z" /><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z" /></svg></span>{t("home.ctaAsk")}</Link>
           </div>
         </div>
       </section>

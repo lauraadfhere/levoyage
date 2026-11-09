@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { isSameOriginRequest, requireViewer } from "@/lib/api-access";
 import { createParseRecord, pointer, queryParse, type ParseRecord } from "@/lib/parse-tourism";
+import { sendReservationAlert } from "@/lib/trip-intelligence";
 
 export const runtime = "nodejs";
 type Booking = ParseRecord & { traveler?: { objectId?: string }; property?: { objectId?: string; __type?: string }; status?: string; checkIn?: string; checkOut?: string; guests?: number; totalMinor?: number; currency?: string; paymentStatus?: string; guestName?: string; guestEmail?: string; bookingReference?: string; createdAt?: string };
@@ -59,6 +60,7 @@ export async function POST(request: Request) {
       guestMessage: typeof body?.guestMessage === "string" ? body.guestMessage.trim().slice(0, 1500) : "",
       bookingType: "request_to_book",
     });
+    await sendReservationAlert({ travelerId: String(auth.viewer.objectId), email: guestEmail, bookingReference: reference, propertyName: property.name || "Accommodation", checkIn });
     return NextResponse.json({ booking: { bookingReference: reference, status: booking.status, paymentStatus: booking.paymentStatus, propertyName: property.name || "Accommodation" } }, { status: 201, headers: { "Cache-Control": "private, no-store" } });
   } catch {
     return NextResponse.json({ error: "Could not submit the booking request. Please try again." }, { status: 503 });

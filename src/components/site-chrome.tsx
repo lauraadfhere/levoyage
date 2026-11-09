@@ -102,10 +102,10 @@ const footerColumns = [
   },
 ] as const;
 
-export function SiteHeader() {
+export function SiteHeader({ variant }: { variant?: "dashboard" } = {}) {
   const t = createTranslator(localeFromPath(usePathname()));
   return (
-    <header className="inner-header">
+    <header className={variant === "dashboard" ? "inner-header header-dashboard" : "inner-header"}>
       <div className="shell inner-header-row">
         <LocalizedLink className="brand" href="/" aria-label="Le Voyage home">
           <Image src="/levoyage-white.png" alt="Le Voyage" width={192} height={64} priority />
@@ -184,7 +184,7 @@ export function SiteFooter() {
   );
 }
 
-export function MarketingPage({ eyebrow, title, intro, children, artTheme }: { eyebrow: string; title: string; intro: string; children: ReactNode; artTheme?: string }) {
+export function MarketingPage({ eyebrow, title, intro, children, artTheme, headerVariant, className }: { eyebrow: string; title: string; intro: string; children: ReactNode; artTheme?: string; headerVariant?: "dashboard"; className?: string }) {
   const theme = artTheme
     ?? (eyebrow.toLowerCase().includes("stay")
       ? "stays"
@@ -197,8 +197,8 @@ export function MarketingPage({ eyebrow, title, intro, children, artTheme }: { e
             : "explore");
   return (
     <>
-      <SiteHeader />
-      <main className="marketing-page">
+      <SiteHeader variant={headerVariant} />
+      <main className={className ? `marketing-page ${className}` : "marketing-page"}>
         <section className="page-intro">
           <div className="shell">
             <div className="page-intro-copy">
