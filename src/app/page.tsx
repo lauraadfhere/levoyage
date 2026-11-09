@@ -103,9 +103,9 @@ function regionKeyFor(name: string): "home.regionSahara" | "home.regionCoast" | 
 }
 
 const offers = [
-  { placeKey: "home.offer1p", typeKey: "home.offer1t", priceKey: "home.offer1price", agency: "Sahara Horizons", slug: "djanet", image: placeImages[2] },
-  { placeKey: "home.offer2p", typeKey: "home.offer2t", priceKey: "home.offer2price", agency: "Atlas Voyages", slug: "algiers", image: placeImages[0] },
-  { placeKey: "home.offer3p", typeKey: "home.offer3t", priceKey: "home.offer3price", agency: "Oran Travel", slug: "oran", image: placeImages[1] },
+  { placeKey: "home.offer1p", typeKey: "home.offer1t", priceKey: "home.offer1price", agency: "Sahara Horizons", slug: "djanet", image: (wilayaImages as Record<string, { url: string }>)["djanet"]?.url ?? null },
+  { placeKey: "home.offer2p", typeKey: "home.offer2t", priceKey: "home.offer2price", agency: "Atlas Voyages", slug: "algiers", image: (wilayaImages as Record<string, { url: string }>)["algiers"]?.url ?? null },
+  { placeKey: "home.offer3p", typeKey: "home.offer3t", priceKey: "home.offer3price", agency: "Oran Travel", slug: "oran", image: (wilayaImages as Record<string, { url: string }>)["oran"]?.url ?? null },
 ] as const;
 
 const featureKeys = [

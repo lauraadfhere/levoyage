@@ -3,6 +3,7 @@ import "./globals.css";
 import { dejavuMono, inter, lora, poppins } from "./fonts";
 import "./dashboard-enhancements.css";
 import { CookieBanner } from "@/components/cookie-banner";
+import { TripyaiLauncher } from "@/components/tripyai-launcher";
 import { DocumentDirection } from "@/components/document-direction";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 
@@ -53,7 +54,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${poppins.variable} ${inter.variable} ${lora.variable} ${dejavuMono.variable}`} suppressHydrationWarning>
-      <body><DocumentDirection />{children}<CookieBanner /></body>
+      <body><DocumentDirection />{children}<CookieBanner /><TripyaiLauncher /></body>
     </html>
   );
 }
