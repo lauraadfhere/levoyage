@@ -11,6 +11,9 @@ export type PublishedProperty = ParseRecord & {
   facilities?: string[];
   rating?: number;
   reviewCount?: number;
+  nightlyPrice?: number;
+  latitude?: number;
+  longitude?: number;
   business?: Pointer;
   destination?: Pointer;
 };

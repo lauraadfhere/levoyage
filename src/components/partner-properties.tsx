@@ -67,6 +67,9 @@ export function PartnerProperties() {
         <label>Wilaya / destination<input name="city" required placeholder="Algiers, Oran, Djanet…" list="partner-destinations" /></label>
         <datalist id="partner-destinations"><option value="Algiers" /><option value="Oran" /><option value="Constantine" /><option value="Djanet" /><option value="Ghardaïa" /><option value="Béjaïa" /><option value="Tipaza" /></datalist>
         <label>Public address or area<input name="address" maxLength={300} /></label>
+        <label>Nightly price (DZD, optional)<input name="nightlyPrice" type="number" min="1" step="1" placeholder="e.g. 12000" /></label>
+        <label>Latitude (optional)<input name="latitude" type="number" min="-90" max="90" step="any" placeholder="e.g. 36.75" /></label>
+        <label>Longitude (optional)<input name="longitude" type="number" min="-180" max="180" step="any" placeholder="e.g. 3.06" /></label>
         <label className="partner-form-wide">Property description<textarea name="description" required minLength={20} maxLength={2000} rows={5} /></label>
         <label className="partner-form-wide">Facilities, separated by commas<input name="facilities" placeholder="Wi-Fi, breakfast, family rooms" /></label>
         {error && <p className="form-error" role="alert">{error}</p>}{message && <p className="profile-message" role="status">{message}</p>}

@@ -24,7 +24,9 @@ export async function POST(request: Request) {
     if (!destination || !Number.isInteger(guests) || guests < 1 || guests > 20 || !validDate(checkIn) || !validDate(checkOut) || checkOut <= checkIn) {
       return NextResponse.json({ error: "Enter a destination, guest count and stay dates." }, { status: 400 });
     }
-    const result = await suggestReservations({ destination, guests, checkIn, checkOut, interests });
+    const maxPrice = Number(body?.maxPrice);
+    const budget = Number.isFinite(maxPrice) && maxPrice > 0 && maxPrice <= 100_000_000 ? Math.round(maxPrice) : undefined;
+    const result = await suggestReservations({ destination, guests, checkIn, checkOut, interests, maxPrice: budget });
     return NextResponse.json(result, { headers: { "Cache-Control": "private, no-store" } });
   } catch {
     return NextResponse.json({ error: "Could not load suggestions. Please try again." }, { status: 503 });

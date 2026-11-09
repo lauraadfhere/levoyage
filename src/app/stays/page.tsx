@@ -5,7 +5,9 @@ import { getPublishedProperties } from "@/lib/published-properties";
 import { findWilayaByName } from "@/lib/destinations-catalog";
 import { countKey, createTranslator, localeOrDefault, pathFor } from "@/lib/i18n";
 
-type SearchParams = Promise<{ city?: string; q?: string }>;
+type SearchParams = Promise<{ city?: string; q?: string; maxPrice?: string; type?: string }>;
+
+const accommodationTypes = ["hotel", "resort", "apartment", "guesthouse", "villa", "hostel", "residence", "camp", "vacation-home", "bnb", "unique-stay"];
 
 export default async function StaysPage({ searchParams, locale }: { searchParams: SearchParams; locale?: string }) {
   const active = localeOrDefault(locale);
@@ -21,7 +23,15 @@ export default async function StaysPage({ searchParams, locale }: { searchParams
     })),
     getPublishedProperties(),
   ]);
-  const properties = publishedProperties.filter((property) => !term || `${property.name || ""} ${property.destinationName} ${property.type || ""} ${property.description || ""}`.toLocaleLowerCase().includes(term));
+  const maxPrice = Number(params.maxPrice);
+  const budget = Number.isFinite(maxPrice) && maxPrice > 0 ? Math.round(maxPrice) : 0;
+  const typeFilter = accommodationTypes.includes(params.type || "") ? params.type || "" : "";
+  const properties = publishedProperties.filter((property) => {
+    if (term && !`${property.name || ""} ${property.destinationName} ${property.type || ""} ${property.description || ""}`.toLocaleLowerCase().includes(term)) return false;
+    if (typeFilter && property.type !== typeFilter) return false;
+    if (budget && (!property.nightlyPrice || property.nightlyPrice > budget)) return false;
+    return true;
+  });
   const wilaya = city ? findWilayaByName(city) : null;
 
   return (
@@ -33,6 +43,8 @@ export default async function StaysPage({ searchParams, locale }: { searchParams
     >
       <form className="filter-panel destination-filter" action={pathFor("/stays", active)} method="get">
         <input name="q" defaultValue={q || city} placeholder={t("stays.placeholder")} aria-label={t("common.searchStays")} />
+        <label>Max price per night (DZD)<input name="maxPrice" type="number" min="1" step="1" defaultValue={budget || ""} placeholder="e.g. 15000" /></label>
+        <label>Type<select name="type" defaultValue={typeFilter}><option value="">All types</option>{accommodationTypes.map((item) => <option key={item} value={item}>{item.replace("-", " ")}</option>)}</select></label>
         <button type="submit">{t("common.searchStays")}</button>
       </form>
 
@@ -52,7 +64,7 @@ export default async function StaysPage({ searchParams, locale }: { searchParams
       {properties.length ? <div className="offers-grid">
         {properties.slice(0, 24).map((property) => <article className="offer-card" key={property.objectId}>
           <div className="offer-image">{property.destinationName.slice(0, 1)}</div><div>
-            <p className="offer-type">{property.type || t("common.stays")} · {property.destinationName}</p><h3>{property.name}</h3><p className="agency">{t("search.providedBy", { name: property.businessName })}</p>
+            <p className="offer-type">{property.type || t("common.stays")} · {property.destinationName}</p><h3>{property.name}</h3>{property.nightlyPrice ? <p className="agency">{property.nightlyPrice.toLocaleString("en-US")} DZD / night</p> : null}<p className="agency">{t("search.providedBy", { name: property.businessName })}</p>
             <div className="destination-card-actions"><Link href={`/properties/${property.slug}`}>{t("common.viewDetails")}</Link></div>
           </div>
         </article>)}

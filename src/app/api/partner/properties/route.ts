@@ -5,9 +5,23 @@ import { getWilayas } from "@/lib/destinations-catalog";
 import { slugify } from "@/lib/slug";
 
 export const runtime = "nodejs";
-type Property = ParseRecord & { business?: { objectId?: string }; name?: string; slug?: string; type?: string; status?: string; address?: string; description?: string };
+type Property = ParseRecord & { business?: { objectId?: string }; name?: string; slug?: string; type?: string; status?: string; address?: string; description?: string; nightlyPrice?: number; latitude?: number; longitude?: number };
 type Destination = ParseRecord & { slug?: string; wilaya?: string; city?: string };
 const types = new Set(["hotel", "resort", "apartment", "guesthouse", "villa", "hostel", "residence", "camp", "vacation-home", "bnb", "unique-stay"]);
+
+/** Optional nightly price (DZD) and coordinates, validated before storage. Invalid values are dropped. */
+function optionalPricing(body: Record<string, unknown> | null): Partial<Property> {
+  const out: Partial<Property> = {};
+  const price = Number(body?.nightlyPrice);
+  if (body?.nightlyPrice !== undefined && body?.nightlyPrice !== "" && Number.isFinite(price) && price > 0 && price <= 100_000_000) out.nightlyPrice = Math.round(price);
+  const lat = Number(body?.latitude);
+  const lng = Number(body?.longitude);
+  if (body?.latitude !== undefined && body?.longitude !== undefined && body?.latitude !== "" && body?.longitude !== "" && Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180) {
+    out.latitude = lat;
+    out.longitude = lng;
+  }
+  return out;
+}
 
 export async function GET() {
   try {
@@ -48,6 +62,7 @@ export async function POST(request: Request) {
       name, slug: `${slugify(name)}-${crypto.randomUUID().slice(0, 8)}`,
       type, description, address: typeof body?.address === "string" ? body.address.trim().slice(0, 300) : "",
       facilities: Array.isArray(body?.facilities) ? body.facilities.filter((item): item is string => typeof item === "string").slice(0, 20) : [],
+      ...optionalPricing(body),
       status: "draft",
     });
     return NextResponse.json({ property }, { status: 201, headers: { "Cache-Control": "private, no-store" } });

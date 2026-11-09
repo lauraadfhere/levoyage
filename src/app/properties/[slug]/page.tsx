@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { BookingRequestForm } from "@/components/booking-request-form";
+import { DestinationMap } from "@/components/destination-map";
 import { MarketingPage } from "@/components/site-chrome";
 import { getApprovedPropertyReviews, getPublishedPropertyBySlug } from "@/lib/published-properties";
 import { slugify } from "@/lib/slug";
@@ -25,11 +26,15 @@ export default async function PropertyPage({ params, locale }: { params: Promise
         <p>{property.description || t("properties.contactProvider")}</p>
         {property.address && <p><strong>{t("properties.area")}</strong> {property.address}</p>}
         {property.facilities?.length ? <><h2>{t("properties.facilities")}</h2><ul>{property.facilities.map((facility) => <li key={facility}>{facility}</li>)}</ul></> : null}
+        {typeof property.latitude === "number" && typeof property.longitude === "number" && (
+          <DestinationMap className="property-map" markers={[{ name: propertyName, lat: property.latitude, lng: property.longitude }]} />
+        )}
         <p className="availability-note">{t("properties.availabilityNote")}</p>
       </section>
       <aside className="booking-box">
         <p>{t("properties.requestToBook")}</p>
         <strong>{t("properties.providerConfirmation")}</strong>
+        {property.nightlyPrice ? <p><strong>{property.nightlyPrice.toLocaleString("en-US")} DZD</strong> per night</p> : null}
         <small>{t("properties.priceNote")}</small>
         <BookingRequestForm propertySlug={property.slug || slug} propertyName={propertyName} />
         <a href={pathFor(`/explore-360?destination=${encodeURIComponent(slugify(property.destinationName))}`, active)}>{t("properties.explore360")}</a>

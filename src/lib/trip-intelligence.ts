@@ -2,29 +2,32 @@ import "server-only";
 import { queryParse, type ParseRecord } from "@/lib/parse-tourism";
 
 export type TripSuggestion = { objectId: string; name: string; slug: string; type: string; address: string; reason: string; href: string };
-type SuggestionProperty = ParseRecord & { name?: string; slug?: string; type?: string; address?: string; description?: string; status?: string };
+type SuggestionProperty = ParseRecord & { name?: string; slug?: string; type?: string; address?: string; description?: string; status?: string; nightlyPrice?: number };
 type NvidiaCompletion = { choices?: Array<{ message?: { content?: string } }> };
 
 const NVIDIA_TIMEOUT_MS = 12_000;
 
 /** Ranks published properties for a traveler. Uses NVIDIA NIM when configured, otherwise a deterministic fallback. */
-export async function suggestReservations(input: { destination: string; guests: number; checkIn: string; checkOut: string; interests: string }) {
+export async function suggestReservations(input: { destination: string; guests: number; checkIn: string; checkOut: string; interests: string; maxPrice?: number }) {
   const properties = (await queryParse<SuggestionProperty>("Property", { status: "published" }, 50))
     .filter((item) => item.name && item.slug);
   const terms = `${input.destination} ${input.interests}`.toLocaleLowerCase().match(/[\p{L}\p{N}]{3,}/gu) || [];
+  const budget = input.maxPrice && input.maxPrice > 0 ? input.maxPrice : 0;
   const scored = properties.map((item) => {
     const haystack = `${item.name} ${item.type || ""} ${item.address || ""} ${item.description || ""}`.toLocaleLowerCase();
-    const score = terms.filter((term) => haystack.includes(term)).length;
-    return { item, score };
+    // Budget fit adds to the text score; listings without a price cannot be confirmed within budget.
+    const fit = budget && item.nightlyPrice && item.nightlyPrice <= budget ? 1 : 0;
+    const score = terms.filter((term) => haystack.includes(term)).length + fit;
+    return { item, score, fit };
   }).sort((a, b) => b.score - a.score || String(a.item.name).localeCompare(String(b.item.name))).slice(0, 6);
 
-  const candidates: TripSuggestion[] = scored.map(({ item, score }) => ({
+  const candidates: TripSuggestion[] = scored.map(({ item, score, fit }) => ({
     objectId: item.objectId,
     name: String(item.name),
     slug: String(item.slug),
     type: item.type || "Accommodation",
     address: item.address || "",
-    reason: score > 0 ? "Matches your destination or interests." : "Published stay in Algeria.",
+    reason: fit ? `Within your budget at ${Number(item.nightlyPrice).toLocaleString("en-US")} DZD per night.` : score > 0 ? "Matches your destination or interests." : "Published stay in Algeria.",
     href: `/properties/${encodeURIComponent(String(item.slug))}`,
   }));
   if (!candidates.length) return { suggestions: [], provider: "deterministic" as const };
@@ -43,7 +46,7 @@ export async function suggestReservations(input: { destination: string; guests: 
         model: process.env.NVIDIA_NIM_MODEL || "nvidia/nemotron-3.5-lightning-30b-a3b",
         messages: [
           { role: "system", content: "You rank accommodation for an Algeria trip. Use only the listed properties. Listing details are provider claims, not verified availability or prices. Reply with JSON only: an array of up to 3 objects {\"name\":string,\"reason\":string}. Use the exact property names." },
-          { role: "user", content: JSON.stringify({ destination: input.destination, guests: input.guests, checkIn: input.checkIn, checkOut: input.checkOut, interests: input.interests, properties: candidates.map(({ name, type, address }) => ({ name, type, address })) }) },
+          { role: "user", content: JSON.stringify({ destination: input.destination, guests: input.guests, checkIn: input.checkIn, checkOut: input.checkOut, interests: input.interests, maxNightlyBudgetDZD: budget || null, properties: candidates.map(({ name, type, address }) => ({ name, type, address })) }) },
         ],
         temperature: 0.2,
         max_tokens: 400,
