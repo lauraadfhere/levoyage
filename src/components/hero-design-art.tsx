@@ -9,72 +9,78 @@ export function HeroDesignArt() {
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <radialGradient id="hero-art-sun" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stopColor="#FBBF01" stopOpacity=".55" />
-          <stop offset="1" stopColor="#FBBF01" stopOpacity="0" />
-        </radialGradient>
+        {/* Gives every stroke a slightly wobbly, hand-inked edge */}
+        <filter id="hero-art-ink" x="-5%" y="-5%" width="110%" height="110%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
       </defs>
 
-      {/* Sun glow */}
-      <circle cx="470" cy="150" r="170" fill="url(#hero-art-sun)" />
-      <circle cx="470" cy="150" r="58" fill="#FBBF01" fillOpacity=".9" />
+      <g filter="url(#hero-art-ink)" fill="none" stroke="#F5F1E8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        {/* Soft sun glow behind the sun */}
+        <circle cx="470" cy="130" r="78" stroke="#FBBF01" strokeOpacity=".25" strokeWidth="1.4" strokeDasharray="2 8" />
 
-      {/* Mosque silhouette with dome and minaret */}
-      <g fill="#F5F1E8" fillOpacity=".95">
-        <path d="M200 330 V270 Q200 200 260 200 Q320 200 320 270 V330 Z" />
-        <rect x="186" y="318" width="148" height="12" rx="2" />
-        <rect x="335" y="200" width="16" height="130" />
-        <path d="M327 178 L343 200 L311 200 Z" />
-        <rect x="150" y="296" width="20" height="34" />
-        <path d="M140 296 Q160 262 180 296 Z" />
-        <rect x="172" y="286" width="6" height="8" fill="#141414" fillOpacity=".4" />
-      </g>
-      <g fill="#141414" fillOpacity=".35">
-        <path d="M232 330 V296 Q232 268 260 268 Q288 268 288 296 V330 Z" />
-      </g>
+        {/* Hand-drawn sun with rays */}
+        <circle cx="470" cy="130" r="48" stroke="#FBBF01" strokeWidth="2.8" />
+        <path d="M470 60 L470 72 M470 188 L470 200 M400 130 L412 130 M528 130 L540 130 M483 73 L491 65 M449 187 L441 195 M449 73 L441 65 M483 187 L491 195" stroke="#FBBF01" strokeWidth="2.4" />
 
-      {/* Arches of a medina colonnade */}
-      <g stroke="#FBBF01" strokeWidth="3" fill="none" strokeOpacity=".9">
-        <path d="M70 330 V300 Q90 272 110 300 V330" />
-        <path d="M112 330 V300 Q132 272 152 300 V330" />
-      </g>
+        {/* Mosque with dome and minaret, outlined */}
+        <path d="M170 330 V270 Q170 212 228 212 Q286 212 286 270 V330" />
+        <path d="M158 330 H298" />
+        <path d="M300 330 V200 M312 330 V200" />
+        <path d="M300 200 Q306 176 312 200" />
+        <path d="M306 176 V166" />
+        <path d="M228 212 V196" stroke="#FBBF01" />
 
-      {/* Dunes and sea */}
-      <path d="M0 360 Q120 320 240 352 T480 340 T640 330 V480 H0 Z" fill="#3A3A3A" fillOpacity=".7" />
-      <path d="M0 400 Q140 372 280 398 T640 392 V480 H0 Z" fill="#141414" fillOpacity=".85" />
-      <path d="M40 430 q20 -8 40 0 t40 0 t40 0 t40 0 t40 0" fill="none" stroke="#F5F1E8" strokeOpacity=".45" strokeWidth="2" />
-      <path d="M380 445 q20 -8 40 0 t40 0 t40 0 t40 0" fill="none" stroke="#F5F1E8" strokeOpacity=".3" strokeWidth="2" />
+        {/* Arches of a medina colonnade */}
+        <path d="M60 330 V300 Q80 272 100 300 V330 M104 330 V300 Q124 272 144 300 V330" stroke="#FBBF01" strokeWidth="2.4" />
 
-      {/* Travel route with plane */}
-      <path
-        d="M60 110 C 150 40, 260 150, 360 90 S 520 40, 590 110"
-        fill="none"
-        stroke="#FBBF01"
-        strokeWidth="3"
-        strokeLinecap="round"
-        strokeDasharray="2 11"
-      />
-      <g transform="translate(340 86) rotate(-14)">
-        <path d="M0 0 L-26 -8 L-10 0 L-26 8 Z" fill="#FBBF01" />
-        <path d="M-2 -2 L16 -14 L20 -10 L6 0 L20 10 L16 14 L-2 2 Z" fill="#F5F1E8" />
-      </g>
+        {/* Sea and dunes as loose wavy lines */}
+        <path d="M40 350 Q120 330 200 350 T360 350 T520 350 T620 346" stroke="#FBBF01" strokeOpacity=".8" />
+        <path d="M40 372 Q140 356 240 372 T440 372 T620 368" strokeOpacity=".6" />
+        <path d="M60 396 Q160 384 260 396 T460 396 T620 392" strokeOpacity=".4" />
 
-      {/* Map pins */}
-      <g transform="translate(60 110)">
-        <path d="M0 -22 C 9 -22, 14 -15, 14 -8 C 14 3, 0 16, 0 16 C 0 16, -14 3, -14 -8 C -14 -15, -9 -22, 0 -22 Z" fill="#FBBF01" />
-        <circle cx="0" cy="-8" r="5" fill="#141414" />
-      </g>
-      <g transform="translate(590 110)">
-        <path d="M0 -22 C 9 -22, 14 -15, 14 -8 C 14 3, 0 16, 0 16 C 0 16, -14 3, -14 -8 C -14 -15, -9 -22, 0 -22 Z" fill="#F5F1E8" />
-        <circle cx="0" cy="-8" r="5" fill="#141414" />
-      </g>
+        {/* Hand-drawn travel route with a dashed trail */}
+        <path
+          d="M70 150 C 160 90, 250 190, 350 130 S 500 80, 600 160"
+          stroke="#FBBF01"
+          strokeWidth="2.6"
+          strokeDasharray="3 9"
+        />
+        <g transform="translate(352 124) rotate(-14)" stroke="#FBBF01" strokeWidth="2">
+          <path d="M-18 0 L14 -6 M14 -6 L20 0 L14 6 Z M-6 0 L-14 -12 M-6 0 L-14 12" />
+        </g>
 
-      {/* Compass rose */}
-      <g transform="translate(80 205)" stroke="#F5F1E8" strokeOpacity=".7" strokeWidth="1.5" fill="none">
-        <circle r="34" />
-        <path d="M0 -44 L6 0 L0 44 L-6 0 Z" fill="#FBBF01" fillOpacity=".85" stroke="none" />
-        <path d="M-44 0 L0 -6 L44 0 L0 6 Z" fill="#F5F1E8" fillOpacity=".25" stroke="none" />
-        <text y="-50" textAnchor="middle" fill="#FBBF01" fontFamily="Inter, Arial, sans-serif" fontSize="12" fontWeight="700" stroke="none">N</text>
+        {/* Map pins drawn as outlines */}
+        <path d="M70 150 C 62 150, 58 144, 58 138 C 58 130, 70 116, 70 116 C 70 116, 82 130, 82 138 C 82 144, 78 150, 70 150 Z" stroke="#FBBF01" />
+        <circle cx="70" cy="136" r="3.5" stroke="#FBBF01" />
+        <path d="M600 160 C 592 160, 588 154, 588 148 C 588 140, 600 126, 600 126 C 600 126, 612 140, 612 148 C 612 154, 608 160, 600 160 Z" />
+        <circle cx="600" cy="146" r="3.5" />
+
+        {/* Hand-drawn compass */}
+        <g transform="translate(96 386)" stroke="#F5F1E8" strokeOpacity=".7">
+          <circle r="30" />
+          <path d="M0 -40 L6 0 L0 40 L-6 0 Z" stroke="#FBBF01" />
+          <path d="M-40 0 L40 0" strokeOpacity=".4" />
+        </g>
+
+        {/* Minaret and small palm on the far right */}
+        <path d="M540 330 V236 M548 330 V236 M540 236 Q544 216 548 236 M544 216 V204" stroke="#F5F1E8" strokeOpacity=".8" />
+        <path d="M560 330 V298 M560 298 Q540 290 528 300 M560 298 Q580 288 594 298 M560 298 Q552 280 566 270" stroke="#FBBF01" strokeWidth="2" />
+
+        {/* Tent and camel on the dunes */}
+        <path d="M236 380 L262 344 L288 380 Z M262 344 V380" stroke="#FBBF01" strokeWidth="2" />
+        <path d="M330 378 Q336 364 348 368 L356 360 L362 370 Q372 372 368 382 H330 Z M338 382 V394 M356 382 V394" stroke="#F5F1E8" strokeOpacity=".75" strokeWidth="2" />
+
+        {/* Dune ridge lines */}
+        <path d="M300 420 Q360 404 430 420 T600 418" strokeOpacity=".35" />
+
+        {/* Hand-drawn luggage tag on the right */}
+        <g transform="translate(470 300) rotate(8)" stroke="#F5F1E8" strokeOpacity=".85">
+          <path d="M0 0 H96 L118 22 L96 44 H0 Z" />
+          <circle cx="16" cy="22" r="5" />
+          <path d="M40 16 H84 M40 28 H72" strokeOpacity=".5" />
+        </g>
       </g>
     </svg>
   );

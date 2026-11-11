@@ -1,6 +1,13 @@
 import Link from "next/link";
+import { DestinationPicture, type DestinationPictureKind } from "@/components/destination-picture";
 
 type Locale = "en" | "fr" | "ar";
+
+const pictureKind: Record<string, DestinationPictureKind> = {
+  algiers: "sea", oran: "sea", tipaza: "sea", bejaia: "sea", annaba: "sea",
+  constantine: "ksar", tlemcen: "ksar", ghardaia: "ksar",
+  illizi: "desert", djanet: "desert", tamanrasset: "desert", timimoun: "desert",
+};
 
 const featured = [
   { slug: "algiers", name: { en: "Algiers", fr: "Alger", ar: "الجزائر العاصمة" }, note: { en: "Casbah, Notre-Dame d'Afrique and the Mediterranean bay.", fr: "Casbah, Notre-Dame d'Afrique et la baie méditerranéenne.", ar: "القصبة وكاتدرائية نوتردام دافريك وخليج المتوسط." } },
@@ -32,6 +39,7 @@ export function FeaturedDestinations({ locale }: { locale: Locale }) {
       <div className="catalog-grid destination-grid">
         {featured.map((item) => (
           <article className="catalog-card" key={item.slug}>
+            <DestinationPicture kind={pictureKind[item.slug]} label={item.name[locale]} />
             <div className="catalog-copy">
               <h3>{item.name[locale]}</h3>
               <p className="catalog-detail">{item.note[locale]}</p>

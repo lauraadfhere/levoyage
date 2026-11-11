@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ProfileForm } from "@/components/account-forms";
+import { ProfileTripAnalytics } from "@/components/profile-trip-analytics";
 import { DashboardFooter } from "@/components/dashboard-chrome";
 import { SiteHeader } from "@/components/site-chrome";
 import { createTranslator, dirFor, localeOrDefault, pathFor } from "@/lib/i18n";
@@ -18,7 +19,7 @@ export default function ProfilePage({ locale }: { locale?: string }) {
           <p>{t("profile.intro")}</p>
         </div>
       </section>
-      <div className="shell page-content"><ProfileForm /></div>
+      <div className="shell page-content"><ProfileForm /><ProfileTripAnalytics /></div>
     </main>
     <DashboardFooter />
   </div>;

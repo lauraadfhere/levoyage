@@ -16,32 +16,10 @@ const headerLinks = [
   ["header.guide", "/guide"],
 ] as const;
 
-const footerTopLinks = [
-  ["footer.top.countries", "/destinations"],
-  ["footer.top.regions", "/destinations"],
-  ["footer.top.cities", "/destinations"],
-  ["footer.top.districts", "/destinations"],
-  ["footer.top.airports", "/explore"],
-  ["footer.top.hotels", "/stays"],
-  ["footer.top.pois", "/explore"],
-  ["footer.top.vacationHomes", "/stays"],
-  ["footer.top.apartments", "/stays"],
-  ["footer.top.resorts", "/stays"],
-  ["footer.top.villas", "/stays"],
-  ["footer.top.hostels", "/stays"],
-  ["footer.top.bnb", "/stays"],
-  ["footer.top.guestHouses", "/stays"],
-  ["footer.top.unique", "/experiences"],
-  ["footer.top.allDestinations", "/destinations"],
-] as const;
-
-const footerSecondaryLinks = [
-  ["footer.secondary.flights", "/explore"],
-  ["footer.secondary.cars", "/explore"],
-  ["footer.secondary.vacations", "/destinations"],
-  ["footer.secondary.guides", "/guide"],
-  ["footer.secondary.discover", "/explore"],
-  ["footer.secondary.monthly", "/stays"],
+const footerLegalLinks = [
+  ["footer.col.service", "/terms"],
+  ["footer.col.privacy", "/privacy"],
+  ["footer.col.content", "/privacy"],
 ] as const;
 
 const footerColumns = [
@@ -133,18 +111,16 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="footer-content">
-        <nav className="footer-toplinks" aria-label={t("footer.top.aria")}>
-          <div className="footer-toplinks-row">
-            {footerTopLinks.map(([key, href]) => (
+        <div className="footer-topline">
+          <LocalizedLink href="/" className="footer-logo" aria-label="Le Voyage home">
+            <Image src="/levoyage-white.png" alt="Le Voyage" width={192} height={64} />
+          </LocalizedLink>
+          <nav className="footer-legal" aria-label={t("footer.top.aria")}>
+            {footerLegalLinks.map(([key, href]) => (
               <LocalizedLink key={key} href={href}>{t(key)}</LocalizedLink>
             ))}
-          </div>
-          <div className="footer-toplinks-row">
-            {footerSecondaryLinks.map(([key, href]) => (
-              <LocalizedLink key={key} href={href}>{t(key)}</LocalizedLink>
-            ))}
-          </div>
-        </nav>
+          </nav>
+        </div>
 
         <div className="footer-columns">
           {footerColumns.map((column) => (
@@ -157,27 +133,11 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="footer-locale" aria-label={t("footer.languageCurrency")}>
-          <span className="footer-flag" aria-hidden="true">🇩🇿</span>
-          <span>DZD</span>
-        </div>
-
         <div className="footer-bottom">
           <p>{t("footer.copyright", { year })}</p>
-          <div className="footer-brands" aria-label={t("footer.brands")}>
-            <LocalizedLink href="/" className="footer-brand-mark">Le Voyage</LocalizedLink>
-            <span className="footer-brand-mark brand-veyyri">Veyyri</span>
-            <span className="footer-brand-mark brand-tripy">TRRIPYAI</span>
-            <span className="footer-brand-mark brand-explore">Explore DZ</span>
-            <span className="footer-brand-mark brand-stays">Stays+</span>
+          <div className="footer-locale" aria-label={t("footer.languageCurrency")}>
+            <span>DZD</span>
           </div>
-          <nav className="footer-social" aria-label={t("footer.social")}>
-            <a href="#facebook" aria-label="Facebook">f</a>
-            <a href="#x" aria-label="X">𝕏</a>
-            <a href="#youtube" aria-label="YouTube">▶</a>
-            <a href="#linkedin" aria-label="LinkedIn">in</a>
-            <a href="#instagram" aria-label="Instagram">◎</a>
-          </nav>
         </div>
       </div>
     </footer>

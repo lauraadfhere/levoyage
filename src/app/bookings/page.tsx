@@ -8,7 +8,7 @@ export default function BookingsPage({ locale }: { locale?: string }) {
   return (
     <MarketingPage eyebrow={t("bookings.eyebrow")} title={t("bookings.manageTitle")} intro={t("bookings.manageIntro")} artTheme="explore">
       <TravelerBookings />
-      <TripTracker />
+      <div id="live-tracking"><TripTracker /></div>
     </MarketingPage>
   );
 }

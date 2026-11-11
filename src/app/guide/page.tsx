@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { MarketingPage } from "@/components/site-chrome";
+import { DestinationPicture, type DestinationPictureKind } from "@/components/destination-picture";
 import { createTranslator, localeOrDefault, pathFor } from "@/lib/i18n";
 
 const guides = [
-  { title: "guide.g1t", meta: "guide.g1m", detail: "guide.g1d", slug: "algiers" },
-  { title: "guide.g2t", meta: "guide.g2m", detail: "guide.g2d", slug: "djanet" },
-  { title: "guide.g3t", meta: "guide.g3m", detail: "guide.g3d", slug: "oran" },
+  { title: "guide.g1t", meta: "guide.g1m", detail: "guide.g1d", slug: "algiers", kind: "sea" as DestinationPictureKind },
+  { title: "guide.g2t", meta: "guide.g2m", detail: "guide.g2d", slug: "djanet", kind: "desert" as DestinationPictureKind },
+  { title: "guide.g3t", meta: "guide.g3m", detail: "guide.g3d", slug: "oran", kind: "sea" as DestinationPictureKind },
 ] as const;
 
 export default function GuidePage({ locale }: { locale?: string }) {
@@ -18,10 +19,14 @@ export default function GuidePage({ locale }: { locale?: string }) {
       intro={t("guide.intro")}
       artTheme="guide"
     >
+      <p className="guide-alphabet" aria-hidden="true">
+        <span lang="ar">أ ب ت ث ج ح خ</span>
+        <span>ⴰ ⴱ ⴲ ⴳ ⴴ ⴵ ⴶ</span>
+      </p>
       <div className="catalog-grid">
         {guides.map((guide) => (
           <article className="catalog-card" key={guide.title}>
-            <div className="catalog-image"><span>{t("guide.badge")}</span></div>
+            <DestinationPicture kind={guide.kind} label={t(guide.title)} />
             <div className="catalog-copy">
               <p>{t(guide.meta)}</p>
               <h2>{t(guide.title)}</h2>

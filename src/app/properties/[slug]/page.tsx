@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { BookingRequestForm } from "@/components/booking-request-form";
 import { DestinationMap } from "@/components/destination-map";
+import { PlaceSuggestionForm } from "@/components/place-suggestion-form";
+import { listPublishedSuggestions } from "@/lib/place-suggestions";
 import { MarketingPage } from "@/components/site-chrome";
 import { getApprovedPropertyReviews, getPublishedPropertyBySlug } from "@/lib/published-properties";
 import { slugify } from "@/lib/slug";
@@ -13,6 +15,7 @@ export default async function PropertyPage({ params, locale }: { params: Promise
   const property = await getPublishedPropertyBySlug(slug);
   if (!property) notFound();
   const reviews = await getApprovedPropertyReviews(property.objectId);
+  const suggestions = await listPublishedSuggestions(property.name || slug);
   const propertyName = property.name || t("properties.fallbackName");
   return <MarketingPage
     eyebrow={t("properties.listingEyebrow")}
@@ -46,6 +49,8 @@ export default async function PropertyPage({ params, locale }: { params: Promise
         <p>{t("properties.approvedCount", { count: reviews.length })}</p>
       </div>
       {reviews.length ? <div className="booking-list">{reviews.map((review) => <article className="booking-card" key={review.objectId}><p aria-label={`${review.rating || 0} / 5`}>{"★".repeat(review.rating || 0)}{"☆".repeat(5 - (review.rating || 0))}</p><strong>{review.displayName || t("properties.verifiedTraveler")}</strong>{review.body && <p>{review.body}</p>}</article>)}</div> : <p className="search-empty">{t("properties.noReviews")}</p>}
+      {suggestions.length ? <div className="booking-list">{suggestions.map((item) => <article className="booking-card" key={item.objectId}><strong>{item.displayName || t("properties.verifiedTraveler")}</strong>{item.kind === "review" && item.rating ? <p aria-label={`${item.rating} / 5`}>{"★".repeat(item.rating)}{"☆".repeat(5 - item.rating)}</p> : null}{item.body && <p>{item.body}</p>}</article>)}</div> : null}
+      <PlaceSuggestionForm placeName={property.name || slug} placeType="hotel" propertyId={property.objectId} />
     </section>
   </MarketingPage>;
 }
