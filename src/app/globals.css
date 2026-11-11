@@ -311,7 +311,7 @@ h1, h2, h3, h4, .headline h1, .page-intro h1, .traveler-welcome h1, .content h2,
   text-decoration: none;
 }
 .site-footer .footer-social a:hover { border-color: #003580; color: #003580; background: #fff; }
-.site-footer .footer-logo, .site-footer .footer-logo img { display: none; }
+.site-footer .footer-logo, .site-footer .footer-logo img { display: inline-block; }
 .dashboard-page > .site-footer { margin-top: auto; }
 @media (max-width: 900px) {
   .footer-columns { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px 20px; }
@@ -1138,8 +1138,8 @@ html, body { overflow-x: hidden; }
 .search-page .offer-card a { color: #141414; background: #FBBF01; border-radius: 3px; padding: 6px 12px; font-weight: 700; text-decoration: none; display: inline-block; }
 .search-page .filter-panel label { display: grid; gap: 4px; }.search-page .filter-panel { position: relative; overflow: hidden; }.search-page .filter-panel::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, #FBBF01, #F5F1E8 60%, #FBBF01); }.search-page .catalog-image { position: relative; min-height: 150px; overflow: hidden; }.search-page .catalog-image::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: #FBBF01; }.search-page .catalog-image span { display: inline-block; padding: 4px 10px; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }.search-page .offer-card { position: relative; border-top: 4px solid #FBBF01; }.search-page .offer-card h3 { font-weight: 800; }.search-page .offer-card a:focus-visible, .search-page .catalog-card a:focus-visible, .search-page .destination-card-actions a:focus-visible { outline: 2px solid #FBBF01; outline-offset: 2px; }.search-page .search-results-heading h2 { font-weight: 800; letter-spacing: -.01em; }@media (max-width: 760px) { .search-page .filter-panel { grid-template-columns: 1fr; } }
 
-/* Global scale: show the whole site at 90% so it reads better at 100% browser zoom */
-html { zoom: 0.9; }
+/* Global scale: show the whole site at 85% so it reads better at 100% browser zoom */
+html { zoom: 0.85; }
 
 /* Experiences page: Charcoal & Gold enrichment */
 .experiences-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 0 0 18px; }
