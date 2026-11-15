@@ -52,6 +52,16 @@ export default async function DestinationsPage({ searchParams, locale }: { searc
       intro={t("destinations.intro")}
       artTheme="destinations"
       headerVariant="dashboard"
+      actions={[
+        { label: "Explore in 360° / VR", href: pathFor("/explore-360", active), primary: true },
+        { label: "Plan with AI", href: pathFor("/planner", active) },
+        { label: "Find stays", href: pathFor("/stays", active) },
+      ]}
+      stats={[
+        { value: String(getWilayas().length), label: "Wilayas" },
+        { value: String(getWilayas().reduce((n, w) => n + w.placeCount, 0)), label: "Places" },
+        { value: String(getWilayas().length), label: "360° scenes" },
+      ]}
     >
       <form className="filter-panel destination-filter" action={pathFor("/destinations", active)} method="get">
         <input name="q" defaultValue={query} placeholder={t("destinations.placeholder")} aria-label={t("destinations.searchLabel")} />

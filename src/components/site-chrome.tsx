@@ -144,7 +144,10 @@ export function SiteFooter() {
   );
 }
 
-export function MarketingPage({ eyebrow, title, intro, children, artTheme, headerVariant, className }: { eyebrow: string; title: string; intro: string; children: ReactNode; artTheme?: string; headerVariant?: "dashboard"; className?: string }) {
+export type HeroStat = { value: string; label: string };
+export type HeroAction = { label: string; href: string; primary?: boolean };
+
+export function MarketingPage({ eyebrow, title, intro, children, artTheme, headerVariant, className, stats, actions }: { eyebrow: string; title: string; intro: string; children: ReactNode; artTheme?: string; headerVariant?: "dashboard"; className?: string; stats?: HeroStat[]; actions?: HeroAction[] }) {
   const theme = artTheme
     ?? (eyebrow.toLowerCase().includes("stay")
       ? "stays"
@@ -165,6 +168,20 @@ export function MarketingPage({ eyebrow, title, intro, children, artTheme, heade
               <p className="section-kicker">{eyebrow}</p>
               <h1>{title}</h1>
               <p>{intro}</p>
+              {actions?.length ? (
+                <div className="hero-actions">
+                  {actions.map((action) => (
+                    <a key={action.href} href={action.href} className={action.primary ? "primary" : undefined}>{action.label}</a>
+                  ))}
+                </div>
+              ) : null}
+              {stats?.length ? (
+                <ul className="hero-stats">
+                  {stats.map((stat) => (
+                    <li key={stat.label}><strong>{stat.value}</strong><span>{stat.label}</span></li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
             <div className={`page-intro-art art-${theme}`} aria-hidden="true">
               <span className="intro-sun" />

@@ -1190,3 +1190,67 @@ html { zoom: 0.85; }
 .map-tools button { border: 0; border-radius: 8px; padding: 8px 12px; background: #fff; color: #0b1f3a; font-weight: 700; font-size: 12px; cursor: pointer; box-shadow: 0 4px 12px #0b1f3a33; }
 .map-tools button[aria-pressed="true"] { background: #0b1f3a; color: #fff; }
 .panorama-actions button[aria-pressed="true"] { background: #ffffff33; }
+
+/* ===== Visual refresh: hero, loader, cards, dashboard ===== */
+main.marketing-page .page-intro {
+  background:
+    radial-gradient(900px 320px at 85% -10%, #ffd98a55, transparent 60%),
+    radial-gradient(700px 300px at 0% 110%, #7cc6f255, transparent 60%),
+    linear-gradient(120deg, #eaf5ff 0%, #f8fbff 55%, #e6f3fb 100%);
+}
+main.marketing-page .page-intro .section-kicker {
+  display: inline-block; padding: 5px 12px; border-radius: 999px;
+  background: #0b1f3a; color: #ffd36b; letter-spacing: .14em; font-size: 11px;
+}
+.hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.hero-actions a {
+  padding: 11px 18px; border-radius: 999px; border: 1.5px solid #0b1f3a; color: #0b1f3a;
+  font-weight: 700; font-size: 14px; text-decoration: none; background: #ffffffb3;
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.hero-actions a:hover { transform: translateY(-2px); box-shadow: 0 8px 20px #0b1f3a26; background: #fff; }
+.hero-actions a.primary { background: #0b1f3a; color: #fff; }
+.hero-actions a.primary:hover { background: #12325c; }
+.hero-stats { display: flex; flex-wrap: wrap; gap: 12px; margin: 22px 0 0; padding: 0; list-style: none; }
+.hero-stats li {
+  display: grid; gap: 2px; min-width: 104px; padding: 12px 16px; border-radius: 14px;
+  background: #ffffffc4; backdrop-filter: blur(6px); border: 1px solid #d5e4f2; box-shadow: 0 6px 18px #0b1f3a12;
+}
+.hero-stats strong { font-size: 24px; line-height: 1; color: #0b1f3a; }
+.hero-stats span { font-size: 12px; font-weight: 600; color: #53647c; }
+
+.catalog-card { transition: transform .22s ease, box-shadow .22s ease; }
+.catalog-card:hover { transform: translateY(-4px); box-shadow: 0 16px 34px #0b1f3a24; }
+.catalog-card .catalog-image { transition: transform .5s ease; }
+.catalog-card:hover .catalog-image { transform: scale(1.04); }
+.destination-card-actions a { transition: background .15s ease, transform .15s ease; }
+.destination-card-actions a:hover { transform: translateY(-1px); }
+
+.feature-channel-grid a { transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.feature-channel-grid a:hover { transform: translateY(-3px); box-shadow: 0 10px 24px #0b1f3a1f; border-color: #0876db; }
+
+/* Loader */
+.app-loader {
+  background:
+    radial-gradient(600px 400px at 50% 40%, #12325c, transparent 70%),
+    linear-gradient(160deg, #071627, #0b1f3a 60%, #10304f);
+  color: #fff;
+}
+.app-loader::before {
+  content: "LE VOYAGE"; position: absolute; top: calc(50% - 92px); left: 0; right: 0; text-align: center;
+  font-family: var(--font-heading); font-weight: 700; letter-spacing: .32em; font-size: 14px; color: #ffd36b;
+}
+.app-loader-bar { background: #ffffff22; }
+.app-loader-bar::after { background: linear-gradient(90deg, #ffd36b, #ff8a3d, #ffd36b); }
+
+/* Dashboard polish */
+.dashboard-shell { animation: dash-in .45s ease both; }
+@keyframes dash-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.tourist-map { box-shadow: 0 18px 44px #0b1f3a1f; border-radius: 16px; }
+.place-list a { transition: background .15s ease, padding-inline-start .15s ease; }
+.place-list a:hover { background: #eef6ff; padding-inline-start: 6px; }
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-shell, .catalog-card, .hero-actions a { animation: none; transition: none; }
+}
+@media (max-width: 600px) { .hero-stats li { min-width: 92px; padding: 10px 12px; } .hero-stats strong { font-size: 20px; } }
+.app-loader { position: relative; }
