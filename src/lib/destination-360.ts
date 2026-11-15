@@ -1,5 +1,6 @@
-import { slugify } from "@/lib/slug";
+﻿import { slugify } from "@/lib/slug";
 import { getDestinationBySlug, getWilayas } from "@/lib/destinations-catalog";
+import { proceduralUrl, terrainForPlace, terrainForWilayaCode } from "@/lib/procedural-panorama";
 
 export type PanoramaScene = {
   id: string;
@@ -10,6 +11,9 @@ export type PanoramaScene = {
   description: string;
   imageUrl: string;
   kind: "destination" | "stay" | "experience";
+  projection: "flat" | "equirect";
+  /** Illustration rather than photographic capture. */
+  illustrative: boolean;
 };
 
 /** Curated equirectangular / wide scenic seeds for immersive previews. */
@@ -31,14 +35,14 @@ const SCENE_SEEDS: Array<{ match: RegExp; title: string; description: string; im
   {
     match: /djanet|tassili/i,
     title: "Djanet & Tassili horizon",
-    description: "Open desert rock formations and Saharan light — explore before you book a camp.",
+    description: "Open desert rock formations and Saharan light â€” explore before you book a camp.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Tassili_n%27Ajjer_National_Park.jpg/1280px-Tassili_n%27Ajjer_National_Park.jpg",
     kind: "stay",
   },
   {
     match: /gharda|mzab|m'zab/i,
-    title: "M’Zab valley ksour",
-    description: "Adobe rooftops and oasis geometry around Ghardaïa.",
+    title: "Mâ€™Zab valley ksour",
+    description: "Adobe rooftops and oasis geometry around GhardaÃ¯a.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Ghardaia.jpg/1280px-Ghardaia.jpg",
     kind: "destination",
   },
@@ -52,13 +56,13 @@ const SCENE_SEEDS: Array<{ match: RegExp; title: string; description: string; im
   {
     match: /tipaza|tipasa/i,
     title: "Tipaza Roman coast",
-    description: "Ruins meeting the sea — a classic coastal heritage stop.",
+    description: "Ruins meeting the sea â€” a classic coastal heritage stop.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Tipasa.jpg/1280px-Tipasa.jpg",
     kind: "experience",
   },
   {
-    match: /bejaia|b[eé]ja[iï]a|bougie/i,
-    title: "Béjaïa coastline",
+    match: /bejaia|b[eÃ©]ja[iÃ¯]a|bougie/i,
+    title: "BÃ©jaÃ¯a coastline",
     description: "Cape and bay scenery on the Kabyle Mediterranean.",
     imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/B%C3%A9jaia_%D8%A8%D8%AC%D8%A7%D9%8A%D8%A9_09.jpg/1280px-B%C3%A9jaia_%D8%A8%D8%AC%D8%A7%D9%8A%D8%A9_09.jpg",
     kind: "destination",
@@ -79,8 +83,6 @@ const SCENE_SEEDS: Array<{ match: RegExp; title: string; description: string; im
   },
 ];
 
-const FALLBACK_IMAGE =
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/B%C3%A9jaia_%D8%A8%D8%AC%D8%A7%D9%8A%D8%A9_09.jpg/1280px-B%C3%A9jaia_%D8%A8%D8%AC%D8%A7%D9%8A%D8%A9_09.jpg";
 
 function seedFor(name: string) {
   return SCENE_SEEDS.find((seed) => seed.match.test(name)) || null;
@@ -90,35 +92,54 @@ export function getScenesForDestination(wilayaSlug: string, placeName?: string):
   const destination = getDestinationBySlug(wilayaSlug);
   if (!destination) return [];
 
-  const scenes: PanoramaScene[] = [];
+  const baseKind = terrainForWilayaCode(destination.code);
   const wilayaSeed = seedFor(destination.name);
-  scenes.push({
-    id: `${destination.slug}-overview`,
-    title: wilayaSeed?.title || `${destination.name} overview`,
-    wilayaSlug: destination.slug,
-    wilayaName: destination.name,
-    description: wilayaSeed?.description || `Immersive preview of ${destination.name}. Drag to look around, then open VR on supported devices.`,
-    imageUrl: wilayaSeed?.imageUrl || FALLBACK_IMAGE,
-    kind: wilayaSeed?.kind || "destination",
-  });
+  const scenes: PanoramaScene[] = [
+    {
+      id: `${destination.slug}-overview`,
+      title: `${destination.name} — 360° overview`,
+      wilayaSlug: destination.slug,
+      wilayaName: destination.name,
+      description: `Look all the way around ${destination.name}. Illustrated ${baseKind} preview until a verified photographic capture is published.`,
+      imageUrl: proceduralUrl(baseKind, `${destination.code}-${destination.slug}`),
+      kind: "destination",
+      projection: "equirect",
+      illustrative: true,
+    },
+  ];
+
+  if (wilayaSeed) {
+    scenes.push({
+      id: `${destination.slug}-photo`,
+      title: wilayaSeed.title,
+      wilayaSlug: destination.slug,
+      wilayaName: destination.name,
+      description: `${wilayaSeed.description} (wide photo preview, not a full sphere).`,
+      imageUrl: wilayaSeed.imageUrl,
+      kind: wilayaSeed.kind,
+      projection: "flat",
+      illustrative: false,
+    });
+  }
 
   const placeFocus = placeName
     ? destination.places.find((place) => slugify(place.name) === slugify(placeName) || place.name.toLocaleLowerCase() === placeName.toLocaleLowerCase())
     : null;
-
   const placeCandidates = placeFocus ? [placeFocus, ...destination.places.filter((p) => p.name !== placeFocus.name)] : destination.places;
 
-  for (const place of placeCandidates.slice(0, 5)) {
-    const placeSeed = seedFor(place.name) || wilayaSeed;
+  for (const place of placeCandidates.slice(0, 6)) {
+    const kind = terrainForPlace(place.name, baseKind);
     scenes.push({
       id: `${destination.slug}-${slugify(place.name)}`,
       title: place.name,
       wilayaSlug: destination.slug,
       wilayaName: destination.name,
       placeName: place.name,
-      description: `Explore ${place.name} in ${destination.name} before adding it to your trip.`,
-      imageUrl: placeSeed?.imageUrl || FALLBACK_IMAGE,
+      description: `Explore ${place.name} in ${destination.name} before adding it to your trip. Illustrated ${kind} preview.`,
+      imageUrl: proceduralUrl(kind, `${destination.code}-${slugify(place.name)}`),
       kind: "experience",
+      projection: "equirect",
+      illustrative: true,
     });
   }
 
@@ -132,15 +153,20 @@ export function listFeatured360Scenes(limit = 12): PanoramaScene[] {
     const found = getScenesForDestination(slug)[0];
     if (found) scenes.push(found);
   }
-  if (scenes.length < limit) {
-    for (const wilaya of getWilayas()) {
-      if (scenes.some((scene) => scene.wilayaSlug === wilaya.slug)) continue;
-      const overview = getScenesForDestination(wilaya.slug)[0];
-      if (overview) scenes.push(overview);
-      if (scenes.length >= limit) break;
-    }
+  for (const wilaya of getWilayas()) {
+    if (scenes.length >= limit) break;
+    if (scenes.some((scene) => scene.wilayaSlug === wilaya.slug)) continue;
+    const overview = getScenesForDestination(wilaya.slug)[0];
+    if (overview) scenes.push(overview);
   }
   return scenes.slice(0, limit);
+}
+
+/** One 360° overview per wilaya — guarantees national coverage. */
+export function listAllOverviewScenes(): PanoramaScene[] {
+  return getWilayas()
+    .map((wilaya) => getScenesForDestination(wilaya.slug)[0])
+    .filter((scene): scene is PanoramaScene => Boolean(scene));
 }
 
 export function findSceneById(id: string) {

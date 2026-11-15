@@ -55,7 +55,7 @@ export default async function DestinationDetail({
       </nav>
 
       {activeScene ? (
-        <PanoramaViewer title={activeScene.title} description={activeScene.description} imageUrl={activeScene.imageUrl} />
+        <PanoramaViewer title={activeScene.title} description={activeScene.description} imageUrl={activeScene.imageUrl} projection={activeScene.projection} illustrative={activeScene.illustrative} />
       ) : null}
 
       {scenes.length > 1 ? (

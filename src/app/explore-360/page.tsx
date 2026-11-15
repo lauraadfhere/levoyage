@@ -1,7 +1,7 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { PanoramaViewer } from "@/components/panorama-viewer";
 import { MarketingPage } from "@/components/site-chrome";
-import { getScenesForDestination, listFeatured360Scenes } from "@/lib/destination-360";
+import { getScenesForDestination, listAllOverviewScenes, listFeatured360Scenes } from "@/lib/destination-360";
 import { findWilayaByName, getDestinationBySlug } from "@/lib/destinations-catalog";
 import { slugify } from "@/lib/slug";
 import { createTranslator, localeOrDefault, pathFor } from "@/lib/i18n";
@@ -22,6 +22,8 @@ export default async function Explore360Page({ searchParams, locale }: { searchP
     : null;
 
   const scenes = destination ? getScenesForDestination(destination.slug, placeParam) : listFeatured360Scenes(12);
+
+  const allScenes = destination ? [] : listAllOverviewScenes();
 
   const activeScene =
     scenes.find((scene) => scene.id === sceneParam)
@@ -50,7 +52,7 @@ export default async function Explore360Page({ searchParams, locale }: { searchP
       )}
 
       {activeScene ? (
-        <PanoramaViewer title={activeScene.title} description={activeScene.description} imageUrl={activeScene.imageUrl} />
+        <PanoramaViewer title={activeScene.title} description={activeScene.description} imageUrl={activeScene.imageUrl} projection={activeScene.projection} illustrative={activeScene.illustrative} />
       ) : (
         <p className="search-empty">{t("explore360.empty")}</p>
       )}
@@ -67,11 +69,25 @@ export default async function Explore360Page({ searchParams, locale }: { searchP
                 : pathFor(`/explore-360?destination=${scene.wilayaSlug}&scene=${encodeURIComponent(scene.id)}`, active)}
             >
               <strong>{scene.title}</strong>
-              <span>{scene.wilayaName} · {scene.kind}</span>
+              <span>{scene.wilayaName} Â· {scene.kind}</span>
             </Link>
           ))}
         </div>
       </section>
+
+      {!destination ? (
+        <section className="scene-picker" aria-label="All wilayas in 360°">
+          <h2>All {allScenes.length} wilayas in 360°</h2>
+          <div className="scene-picker-list">
+            {allScenes.map((scene) => (
+              <Link key={scene.id} href={pathFor(`/explore-360?destination=${scene.wilayaSlug}`, active)}>
+                <strong>{scene.wilayaName}</strong>
+                <span>360° overview · illustrated preview</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <section className="callout">
         <div>

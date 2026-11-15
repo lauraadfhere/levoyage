@@ -1180,3 +1180,13 @@ html { zoom: 0.85; }
 .tripyai-launcher-panel .tripyai-chat button { background: #FBBF01; color: #141414; }
 .tripyai-launcher-panel .tripyai-chat button:disabled { opacity: .65; }
 .cookie-banner { bottom: 86px; }
+
+/* Live map tracking */
+.map-track { position: absolute; z-index: 2; inset-inline-start: 12px; bottom: 28px; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; max-width: calc(100% - 24px); }
+.map-track button { border: 0; border-radius: 999px; padding: 10px 16px; background: #0b1f3a; color: #fff; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: 0 6px 18px #0b1f3a55; }
+.map-track button[aria-pressed="true"] { background: #2563eb; }
+.map-track span { background: #ffffffee; color: #0b1f3a; border-radius: 10px; padding: 6px 10px; font-size: 12px; font-weight: 600; }
+.map-tools { position: absolute; z-index: 2; inset-inline-end: 56px; top: 10px; display: flex; gap: 6px; }
+.map-tools button { border: 0; border-radius: 8px; padding: 8px 12px; background: #fff; color: #0b1f3a; font-weight: 700; font-size: 12px; cursor: pointer; box-shadow: 0 4px 12px #0b1f3a33; }
+.map-tools button[aria-pressed="true"] { background: #0b1f3a; color: #fff; }
+.panorama-actions button[aria-pressed="true"] { background: #ffffff33; }

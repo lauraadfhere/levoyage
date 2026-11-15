@@ -1,18 +1,38 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { createTranslator, localeFromPath } from "@/lib/i18n";
+import { SphereStage, type SphereControls } from "@/components/panorama-sphere";
+import { drawPanorama, parseProceduralUrl } from "@/lib/procedural-panorama";
 
 type Props = {
   title: string;
   description?: string;
   imageUrl: string;
+  /** equirect = true 360° sphere (WebGL). flat = wide photo preview. */
+  projection?: "flat" | "equirect";
+  /** True when the scene is an illustration, not a verified photographic capture. */
+  illustrative?: boolean;
 };
 
-export function PanoramaViewer({ title, description, imageUrl }: Props) {
+export function PanoramaViewer({ title, description, imageUrl: sourceUrl, projection, illustrative }: Props) {
   const t = createTranslator(localeFromPath(usePathname()));
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const wantsSphere = (projection ?? (parseProceduralUrl(sourceUrl) ? "equirect" : "flat")) === "equirect";
+  const [webglFailed, setWebglFailed] = useState(false);
+  const [stereo, setStereo] = useState(false);
+  const [autoRotate, setAutoRotate] = useState(true);
+  const useSphere = wantsSphere && !webglFailed;
+  const controls = useRef<SphereControls | null>(null);
+  const proc = parseProceduralUrl(sourceUrl);
+  const fallbackUrl = useMemo(() => {
+    if (useSphere || !proc || typeof document === "undefined") return "";
+    const off = document.createElement("canvas");
+    drawPanorama(off, proc.kind, proc.seed);
+    return off.toDataURL("image/jpeg", 0.8);
+  }, [useSphere, proc?.kind, proc?.seed]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const imageUrl = useSphere ? "" : proc ? fallbackUrl : sourceUrl;  const canvasRef = useRef<HTMLCanvasElement>(null);
   const shellRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const yawRef = useRef(0);
@@ -25,7 +45,7 @@ export function PanoramaViewer({ title, description, imageUrl }: Props) {
   useEffect(() => {
     let frame = 0;
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !imageUrl) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -118,6 +138,7 @@ export function PanoramaViewer({ title, description, imageUrl }: Props) {
         if (event.alpha == null || event.beta == null) return;
         yawRef.current = event.alpha / 360;
         pitchRef.current = Math.max(-0.45, Math.min(0.45, (event.beta - 45) / 90));
+        controls.current?.setLook((-event.alpha * Math.PI) / 180, ((event.beta - 90) * Math.PI) / 180);
       };
       window.addEventListener("deviceorientation", onOrient);
       setVrHint(t("pano.vrOn"));
@@ -138,9 +159,12 @@ export function PanoramaViewer({ title, description, imageUrl }: Props) {
   function resetView() {
     yawRef.current = 0;
     pitchRef.current = 0;
+    controls.current?.reset();
   }
 
   async function exitVr() {
+    setStereo(false);
+    controls.current?.setStereo(false);
     if (document.fullscreenElement) await document.exitFullscreen();
     setVrHint("");
   }
@@ -149,28 +173,83 @@ export function PanoramaViewer({ title, description, imageUrl }: Props) {
     <section className="panorama-viewer" ref={shellRef} aria-label={`360 view of ${title}`}>
       <div className="panorama-toolbar">
         <div>
-          <p className="panorama-kicker">360° · VR READY</p>
+          <p className="panorama-kicker">
+            {useSphere ? "360° · VR READY" : "WIDE PREVIEW · VR READY"}
+            {illustrative ? " · ILLUSTRATED PREVIEW — photographic capture pending" : ""}
+          </p>
           <h2>{title}</h2>
           {description ? <p>{description}</p> : null}
         </div>
         <div className="panorama-actions">
+          {useSphere ? (
+            <>
+              <button type="button" aria-label="Zoom in" onClick={() => controls.current?.zoom(-0.15)}>+</button>
+              <button type="button" aria-label="Zoom out" onClick={() => controls.current?.zoom(0.15)}>−</button>
+              <button type="button" aria-pressed={autoRotate} onClick={() => setAutoRotate(controls.current?.toggleAuto() ?? false)}>
+                {autoRotate ? "Pause rotate" : "Auto-rotate"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const url = controls.current?.snapshot();
+                  if (!url) return;
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `${title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}-360.jpg`;
+                  a.click();
+                }}
+              >
+                Save picture
+              </button>
+              <button
+                type="button"
+                aria-pressed={stereo}
+                onClick={async () => {
+                  const next = !stereo;
+                  setStereo(next);
+                  controls.current?.setStereo(next);
+                  if (next) {
+                    await enterVr();
+                    try {
+                      await (screen.orientation as unknown as { lock?: (o: string) => Promise<void> }).lock?.("landscape");
+                    } catch {
+                      /* orientation lock unsupported */
+                    }
+                  }
+                }}
+              >
+                {stereo ? "Mono view" : "Headset (split)"}
+              </button>
+            </>
+          ) : null}
           <button type="button" onClick={resetView}>Reset</button>
           <button type="button" className="panorama-vr" onClick={enterVr}>{t("pano.enter")}</button>
           <button type="button" onClick={exitVr}>{t("pano.exit")}</button>
         </div>
       </div>
-      <div className="panorama-stage">
-        <canvas
-          ref={canvasRef}
-          onPointerDown={pointerDown}
-          onPointerMove={pointerMove}
-          onPointerUp={pointerUp}
-          onPointerCancel={pointerUp}
+      {useSphere ? (
+        <SphereStage
+          source={sourceUrl}
+          label={`360 view of ${title}`}
+          hint={t("pano.hint")}
+          loadingText={t("pano.loading")}
+          controlsRef={controls}
+          onWebglFail={() => setWebglFailed(true)}
         />
-        {!ready && !error ? <p className="panorama-status">{t("pano.loading")}</p> : null}
-        {error ? <p className="panorama-status">{error}</p> : null}
-        <p className="panorama-hint">{t("pano.hint")}</p>
-      </div>
+      ) : (
+        <div className="panorama-stage">
+          <canvas
+            ref={canvasRef}
+            onPointerDown={pointerDown}
+            onPointerMove={pointerMove}
+            onPointerUp={pointerUp}
+            onPointerCancel={pointerUp}
+          />
+          {!ready && !error ? <p className="panorama-status">{t("pano.loading")}</p> : null}
+          {error ? <p className="panorama-status">{error}</p> : null}
+          <p className="panorama-hint">{t("pano.hint")}</p>
+        </div>
+      )}
       {vrHint ? <p className="panorama-vr-hint">{vrHint}</p> : null}
     </section>
   );

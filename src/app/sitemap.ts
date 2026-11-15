@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { SITE_URL } from "@/lib/site";
+import { getWilayas } from "@/lib/destinations-catalog";
 
 const paths = [
   "",
@@ -18,7 +19,8 @@ const paths = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  return paths.flatMap((path) =>
+  const wilayaPaths = getWilayas().flatMap((w) => [`/destinations/${w.slug}`, `/explore-360?destination=${w.slug}`]);
+  return [...paths, ...wilayaPaths].flatMap((path) =>
     ["", "/en", "/fr", "/ar"].map((locale) => ({
       url: `${SITE_URL}${locale}${path}`,
       lastModified: new Date(),

@@ -16,6 +16,7 @@ const mapMarkers: MapMarker[] = places.map((place) => {
   const wilaya = findWilayaByName(place.name);
   return {
     ...place,
+    href360: wilaya ? `/explore-360?destination=${wilaya.slug}` : "/explore-360",
     href: wilaya ? `/destinations/${wilaya.slug}` : `/destinations?place=${encodeURIComponent(place.name)}`,
   };
 });
